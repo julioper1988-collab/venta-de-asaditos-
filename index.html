@@ -1,0 +1,3932 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>Control Asaditos</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f1a2e;
+      --card:#121f39;
+      --muted:#8fa3c8;
+      --text:#e8f0ff;
+      --accent:#4aa3ff;
+      --good:#26c281;
+      --warn:#ffb020;
+      --bad:#ff5b5b;
+      --line:rgba(255,255,255,.08);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --radius2:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 20% -10%, rgba(74,163,255,.20), transparent 60%),
+                  radial-gradient(1200px 800px at 90% 10%, rgba(38,194,129,.18), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+    button,input,select,textarea{font:inherit}
+    .app{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 16px 16px 90px;
+    }
+    header{
+      position:sticky;
+      top:0;
+      z-index:5;
+      backdrop-filter: blur(10px);
+      background: rgba(11,18,32,.72);
+      border-bottom:1px solid var(--line);
+      margin: -16px -16px 12px;
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .brand{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      min-width:0;
+    }
+    .logo{
+      width:38px;height:38px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(74,163,255,.95), rgba(38,194,129,.85));
+      box-shadow: var(--shadow);
+      display:grid; place-items:center;
+      font-weight:900;
+      color:#0b1220;
+    }
+    .brand h1{
+      font-size:16px;
+      margin:0;
+      line-height:1.1;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 52vw;
+    }
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 52vw;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color:var(--text);
+      box-shadow: 0 10px 20px rgba(0,0,0,.18);
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pill:active{transform: translateY(1px)}
+    .pill small{color:var(--muted)}
+    .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+    @media (min-width: 820px){
+      .grid{grid-template-columns: 1.2fr .8fr}
+      .brand h1{max-width: 360px}
+      .brand .sub{max-width: 360px}
+    }
+    .card{
+      background: rgba(18,31,57,.88);
+      border:1px solid var(--line);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .card .hd h2{
+      font-size: 14px;
+      margin:0;
+      letter-spacing:.2px;
+    }
+    .card .hd .meta{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .card .bd{padding: 14px}
+    .muted{color:var(--muted)}
+    .kpi{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+    }
+    .kpi .box{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius: 16px;
+      padding: 10px 10px;
+      min-height: 66px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:4px;
+    }
+    .kpi .box .lbl{font-size:11px;color:var(--muted)}
+    .kpi .box .val{font-weight:800; font-size:15px}
+    .kpi .box.good .val{color: var(--good)}
+    .kpi .box.bad .val{color: var(--bad)}
+    .kpi .box.warn .val{color: var(--warn)}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .08s ease;
+    }
+    .btn.primary{
+      border-color: rgba(74,163,255,.35);
+      background: linear-gradient(180deg, rgba(74,163,255,.22), rgba(74,163,255,.10));
+    }
+    .btn.danger{
+      border-color: rgba(255,91,91,.35);
+      background: linear-gradient(180deg, rgba(255,91,91,.16), rgba(255,91,91,.06));
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn.small{padding: 10px 12px; border-radius: 12px; font-size: 13px}
+    .btn.ghost{background: transparent}
+    .btn[disabled]{opacity:.55; cursor:not-allowed}
+    .fields{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+    }
+    .fields.two{grid-template-columns: 1fr 1fr}
+    .fields.three{grid-template-columns: 1fr 1fr 1fr}
+    @media (max-width: 420px){
+      .fields.two,.fields.three{grid-template-columns: 1fr}
+      .kpi{grid-template-columns: 1fr}
+    }
+    label{
+      display:block;
+      font-size:12px;
+      color: var(--muted);
+      margin:0 0 6px;
+    }
+    input,select,textarea{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      outline:none;
+    }
+    textarea{min-height: 88px; resize: vertical}
+    input::placeholder, textarea::placeholder{color: rgba(143,163,200,.7)}
+    .chips{
+      display:flex;
+      gap:8px;
+      overflow:auto;
+      padding-bottom:4px;
+      scrollbar-width: none;
+    }
+    .chips::-webkit-scrollbar{display:none}
+    .chip{
+      flex: 0 0 auto;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      font-size: 13px;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
+    .chip.active{
+      border-color: rgba(74,163,255,.45);
+      background: rgba(74,163,255,.15);
+    }
+    .prodgrid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:10px;
+    }
+    @media (min-width: 520px){
+      .prodgrid{grid-template-columns: repeat(3, minmax(0,1fr))}
+    }
+    @media (min-width: 920px){
+      .prodgrid{grid-template-columns: repeat(4, minmax(0,1fr))}
+    }
+    .prod{
+      border:1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px 12px;
+      background: rgba(255,255,255,.03);
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-height: 92px;
+    }
+    .prod:active{transform: translateY(1px)}
+    .prod .name{font-weight:800; font-size: 13px; line-height: 1.2}
+    .prod .cat{font-size:11px;color:var(--muted)}
+    .prod .price{font-weight:900; font-size: 13px}
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      font-size: 12px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .badge-off{opacity:.7}
+    .badge-idle{opacity:.9}
+    .badge-pushing{font-weight:800}
+    .badge-ok{font-weight:800}
+    .badge-err{font-weight:900}
+    .badge-conflict{font-weight:900}
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .item{
+      border:1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.03);
+      padding: 12px 12px;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .item .left{min-width:0}
+    .item .title{
+      font-weight:900;
+      font-size: 13px;
+      margin:0 0 2px;
+      line-height: 1.2;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 64vw;
+    }
+    .item .desc{font-size:12px;color:var(--muted)}
+    .item .right{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:6px;
+      text-align:right;
+    }
+    .money{
+      font-weight:900;
+      font-size: 13px;
+    }
+    .tiny{font-size:11px;color:var(--muted)}
+    .sep{height:1px;background:var(--line); margin: 10px 0}
+    .cart{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top: 10px;
+    }
+    .cartrow{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      align-items:center;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius: 16px;
+      padding: 10px 10px;
+    }
+    .cartrow .n{font-weight:800; font-size: 13px; margin:0}
+    .cartrow .m{font-size:12px; color:var(--muted)}
+    .cartrow .acts{display:flex; gap:8px; align-items:center}
+    .qtybtn{
+      width:34px; height:34px; border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      font-weight:900;
+    }
+    .qtybtn:active{transform: translateY(1px)}
+    .qty{
+      min-width: 28px;
+      text-align:center;
+      font-weight:900;
+    }
+    .footerbar{
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+      background: rgba(11,18,32,.82);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+      z-index: 20;
+    }
+    .nav{
+      display:grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap:8px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+    .nav button{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      padding: 10px 8px;
+      border-radius: 16px;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      font-size: 11px;
+      user-select:none;
+    }
+    .nav button.active{
+      color: var(--text);
+      border-color: rgba(74,163,255,.45);
+      background: rgba(74,163,255,.12);
+    }
+    .nav .ico{font-size: 16px; line-height: 1}
+    .hide{display:none !important}
+    .modal{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+      z-index: 50;
+    }
+    .modal.show{display:flex}
+    .sheet{
+      width: min(980px, 100%);
+      background: rgba(18,31,57,.95);
+      border: 1px solid var(--line);
+      border-radius: 24px 24px 18px 18px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      max-height: 88vh;
+      display:flex;
+      flex-direction:column;
+    }
+    .sheet .top{
+      padding: 14px 14px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom: 1px solid var(--line);
+      gap:10px;
+    }
+    .sheet .top h3{margin:0;font-size:14px}
+    .sheet .cnt{
+      padding: 14px;
+      overflow:auto;
+    }
+    .toast{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 86px;
+      background: rgba(18,31,57,.96);
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      border-radius: 999px;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      display:none;
+      z-index: 60;
+      font-size: 13px;
+      max-width: 92vw;
+      text-align:center;
+    }
+    .toast.show{display:block; animation: pop .15s ease-out}
+    @keyframes pop{from{transform:translateX(-50%) translateY(6px); opacity:0} to{transform:translateX(-50%) translateY(0); opacity:1}}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    .hint{font-size:12px;color:var(--muted); line-height:1.35}
+  
+    /* --- Mesas con colores --- */
+    .chip.table-free{ border-color: rgba(38,194,129,.55); background: rgba(38,194,129,.10); }
+    .chip.table-pending{ border-color: rgba(255,193,7,.60); background: rgba(255,193,7,.14); }
+    .chip.table-overdue{ border-color: rgba(244,67,54,.60); background: rgba(244,67,54,.14); }
+    .chip.table-free.active, .chip.table-pending.active, .chip.table-overdue.active{
+      box-shadow: 0 0 0 3px rgba(125,211,252,.15);
+    }
+    .tableBoard{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px; }
+    @media (max-width: 900px){ .tableBoard{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media (max-width: 520px){ .tableBoard{ grid-template-columns: 1fr; } }
+    .tableCard{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius: 14px;
+      padding: 10px;
+    }
+    .tableCard.free{ border-color: rgba(38,194,129,.35); background: rgba(38,194,129,.07); }
+    .tableCard.pending{ border-color: rgba(255,193,7,.35); background: rgba(255,193,7,.08); }
+    .tableCard.overdue{ border-color: rgba(244,67,54,.35); background: rgba(244,67,54,.08); }
+    .tableCard .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+    .tableCard .tTitle{ font-weight:800; }
+    .tableCard .tMeta{ font-size:12px; opacity:.8; margin-top:2px; }
+    .tableCard .tTotal{ font-weight:800; }
+    .tableCard .btnRow{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; justify-content:flex-end; }
+    /* --- Contador de efectivo flotante --- */
+    #floatCashBtn{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 9999;
+      border-radius: 999px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(10,14,20,.86);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color: #fff;
+      cursor: pointer;
+    }
+    #floatCashBtn small{ opacity:.8; }
+
+
+  /* Sync badge: ancho fijo para que no mueva el layout */
+  #syncBadge{ display:inline-block; min-width:72px; text-align:center; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">A</div>
+        <div style="min-width:0">
+          <h1>Control Asaditos</h1>
+          <div class="sub" id="hdrSub">Supabase · Sync automático</div>
+        </div>
+      </div>
+      <div class="row">
+        
+        <button class="pill" id="btnInv" title="Inventario del día">
+          📦 <small>Inventario</small>
+        </button>
+        <button class="pill" id="btnBackup" title="Exportar / Importar JSON">
+          ⬇️⬆️ <small>Export/Import</small>
+        </button>
+        <button class="pill hide" id="btnSync" title="Sincronizar entre dispositivos" style="display:none">
+
+          ☁️ <small>Sync</small> <span id="syncBadge" class="badge badge-off">OFF</span>
+        </button>
+<button class="pill" id="btnReset" title="Reiniciar datos">
+          🧹 <small>Reset</small>
+        </button>
+      </div>
+    </header>
+
+    <!-- VENTAS -->
+    <section id="view-ventas">
+      <div class="grid">
+        <div class="card">
+          <div class="hd">
+            <div>
+              <h2>Venta rápida</h2>
+              <div class="meta">Tocá productos para armar el carrito</div>
+            </div>
+            <span class="badge" id="badgeToday">📅 Hoy</span>
+          </div>
+          <div class="bd">
+            <div class="fields two">
+              <div>
+                <label>Cliente</label>
+                <select id="saleClient"></select>
+              </div>
+              <div>
+                <label>Canal</label>
+                <select id="saleChannel">
+                  <option value="Local">Local</option>
+                  <option value="WhatsApp">WhatsApp</option>
+                  <option value="PedidosYa">PedidosYa</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="fields two" style="margin-top:10px">
+              <div>
+                <label>Medio de pago</label>
+                <select id="salePay">
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Tarjeta">Tarjeta</option>
+                  <option value="Crédito">Crédito</option>
+                </select>
+                <div class="hint" style="margin-top:6px">
+                  Sugerido: <span id="paySuggested" class="mono">—</span>
+                </div>
+              </div>
+              <div>
+                <label>Fecha / hora</label>
+                <input id="saleDT" type="datetime-local" />
+              </div>
+            </div>
+            <div class="sep"></div>
+
+            <div>
+              <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+<label style="margin:0">Mesa</label>
+                <span class="badge" id="invStatus">📦 Sin inventario</span>
+              </div>
+              <div class="chips" id="tableChips"></div>
+              <div class="hint" style="margin-top:6px">
+                Tip: si cargás una mesa, podés dejarla <b>pendiente</b> y seguir cobrando sin mesa.
+              </div>
+            </div>
+
+
+
+            <div style="margin-top:12px">
+              <div class="row" style="justify-content:space-between">
+                <label style="margin:0">Categorías</label>
+                <button class="btn small ghost" id="btnNewProd">➕ Producto</button>
+              </div>
+              <div class="chips" id="catChips"></div>
+            </div>
+
+            <div class="sep"></div>
+
+            <div class="prodgrid" id="prodGrid"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="hd">
+            <div>
+              <h2>Carrito</h2>
+              <div class="meta" id="cartMeta">0 ítems</div>
+            </div>
+            <button class="btn small ghost" id="btnClearCart">🗑️ Vaciar</button>
+          </div>
+          <div class="bd">
+            <div class="kpi">
+              <div class="box">
+                <div class="lbl">Total</div>
+                <div class="val" id="cartTotal">Gs 0</div>
+              </div>
+              <div class="box">
+                <div class="lbl">Costo</div>
+                <div class="val" id="cartCost">Gs 0</div>
+              </div>
+              <div class="box">
+                <div class="lbl">Disponible hoy</div>
+                <div class="val" id="cashAvailableToday">Gs 0</div>
+              </div>
+
+              <div class="box good">
+                <div class="lbl">Ganancia</div>
+                <div class="val" id="cartProfit">Gs 0</div>
+              </div>
+            </div>
+
+            
+            <div class="sep"></div>
+            <div>
+              <div class="row" style="justify-content:space-between; align-items:center">
+                <label style="margin:0">Mesas pendientes</label>
+                <button class="btn small ghost" id="btnTablesManage">🧾 Ver</button>
+              </div>
+              <div class="list" id="pendingTables" style="margin-top:10px"></div>
+              <div class="hint" id="pendingEmpty" style="display:none; margin-top:8px">No hay mesas pendientes.</div>
+            </div>
+
+            <div class="sep"></div>
+<div class="cart" id="cartList"></div>
+
+            <div style="margin-top:12px">
+              <label>Observaciones</label>
+              <input id="saleNotes" placeholder="Ej: sin cebolla / delivery / etc." />
+            </div>
+
+            
+            <div class="row" style="margin-top:12px; justify-content:space-between; gap:10px">
+              <button class="btn danger" id="btnDiscardSale">Cancelar</button>
+              <button class="btn" id="btnSavePending">Dejar pendiente ⏳</button>
+              <button class="btn primary" id="btnSaveSale">Cobrar ✅</button>
+            </div>
+
+
+            <div class="sep"></div>
+            <div class="hint">
+              <b>Importante:</b> este sistema se sincroniza automáticamente entre dispositivos usando la nube (Supabase).
+              Si te quedás sin internet, puede funcionar con datos locales y luego se vuelve a sincronizar.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORIAL -->
+    <section id="view-historial" class="hide">
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>Historial de ventas</h2>
+            <div class="meta" id="histMeta">—</div>
+          </div>
+          <div class="row">
+            <button class="btn small" id="btnExportCSV">📄 CSV</button>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="fields three">
+            <div>
+              <label>Desde</label>
+              <input type="date" id="hFrom" />
+            </div>
+            <div>
+              <label>Hasta</label>
+              <input type="date" id="hTo" />
+            </div>
+            <div>
+              <label>Buscar</label>
+              <input id="hSearch" placeholder="cliente / producto / notas..." />
+            </div>
+          </div>
+
+          <div class="sep"></div>
+              
+          <div class="sep"></div>
+
+
+          <div class="sep"></div>
+
+          <div class="kpi">
+            <div class="box">
+              <div class="lbl">Ventas</div>
+              <div class="val" id="kpiSales">Gs 0</div>
+            </div>
+            <div class="box">
+              <div class="lbl">Efectivo</div>
+              <div class="val" id="kpiCash">Gs 0</div>
+            </div>
+            <div class="box">
+              <div class="lbl">Tarjeta</div>
+              <div class="val" id="kpiCard">Gs 0</div>
+            </div>
+          </div>
+          <div class="kpi" style="margin-top:10px">
+            <div class="box">
+              <div class="lbl">Crédito</div>
+              <div class="val" id="kpiCredit">Gs 0</div>
+            </div>
+            <div class="box">
+              <div class="lbl">Costo</div>
+              <div class="val" id="kpiCost">Gs 0</div>
+            </div>
+            <div class="box good">
+              <div class="lbl">Ganancia</div>
+              <div class="val" id="kpiProfit">Gs 0</div>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="list" id="histList"></div>
+          <div class="hint" id="histEmpty" style="display:none; margin-top:10px">No hay ventas en ese rango.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CIERRE -->
+    <section id="view-cierre" class="hide">
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>Cierre de caja</h2>
+            <div class="meta">Esperado vs contado (descuadres)</div>
+          </div>
+          <button class="btn small primary" id="btnSaveClose">Guardar cierre ✅</button>
+        </div>
+        <div class="bd">
+          <div class="fields two">
+            <div>
+              <label>Fecha a cerrar</label>
+              <input type="date" id="cDate" />
+            </div>
+            <div>
+              <label>Nota</label>
+              <input id="cNote" placeholder="Ej: POS Dinelco / faltante cambio..." />
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="kpi">
+            <div class="box">
+              <div class="lbl">Esperado total</div>
+              <div class="val" id="cExpTot">Gs 0</div>
+            </div>
+            <div class="box">
+              <div class="lbl">Contado total</div>
+              <div class="val" id="cCntTot">Gs 0</div>
+            </div>
+            <div class="box" id="cDiffBox">
+              <div class="lbl">Descuadre</div>
+              <div class="val" id="cDiff">Gs 0</div>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="fields three">
+            <div>
+              <label>Efectivo (contado)</label>
+              <input id="cCash" inputmode="numeric" placeholder="0" />
+              <div class="hint">Esperado: <span class="mono" id="cCashExp">Gs 0</span></div>
+            </div>
+            <div>
+              <label>Tarjeta (reportado)</label>
+              <input id="cCard" inputmode="numeric" placeholder="0" />
+              <div class="hint">Esperado: <span class="mono" id="cCardExp">Gs 0</span></div>
+            </div>
+            <div>
+              <label>Crédito (reportado)</label>
+              <input id="cCredit" inputmode="numeric" placeholder="0" />
+              <div class="hint">Esperado: <span class="mono" id="cCreditExp">Gs 0</span></div>
+              <div class="hint" style="margin-top:4px">Crédito detalle: <span class="mono">PedidosYa</span> <span class="mono" id="cCreditPyExp">Gs 0</span> · <span class="mono">Otros</span> <span class="mono" id="cCreditOtherExp">Gs 0</span></div>
+            </div>
+          </div>
+
+          
+          <div class="sep"></div>
+
+          <div class="card" style="background: rgba(255,255,255,.02)">
+            <div class="hd">
+              <div>
+                <h2 style="font-size:13px">Contador de efectivo (billetes/monedas)</h2>
+                <div class="meta">Esto completa automáticamente <b>Efectivo (contado)</b></div>
+              </div>
+              <button class="btn small" id="btnOpenCashCounter">Abrir 💵</button>
+            </div>
+            <div class="bd">
+              <div id="denomGrid" class="fields two"></div>
+              <div class="row" style="justify-content:space-between; margin-top:10px">
+                <button class="btn ghost" id="btnClearDenoms">Limpiar</button>
+                <div class="money" id="denomTotal">Gs 0</div>
+              </div>
+            </div>
+          </div>
+            <div>
+              <label>Gastos (efectivo)</label>
+              <div class="row" style="gap:6px">
+                <input id="cExpAmt" inputmode="numeric" placeholder="0" />
+                <input id="cExpNote" placeholder="Descripción (opcional)" />
+                <button class="btn small" id="cExpAdd">Agregar</button>
+              </div>
+              <div class="hint">Total gastos: <span class="mono" id="cExpTotal">Gs 0</span> · Efectivo neto esperado: <span class="mono" id="cCashNetExp">Gs 0</span></div>
+              <div id="cExpList" class="list"></div>
+            </div>
+
+
+
+          <div class="card" style="background: rgba(255,255,255,.02)">
+            <div class="hd">
+              <div>
+                <h2 style="font-size:13px">Cierres guardados</h2>
+                <div class="meta">Tap para ver detalle</div>
+              </div>
+            </div>
+            <div class="bd">
+              <div class="list" id="closeList"></div>
+              <div class="hint" id="closeEmpty" style="display:none">Todavía no hay cierres guardados.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLIENTES -->
+    <section id="view-clientes" class="hide">
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>Clientes</h2>
+            <div class="meta">Crear y seleccionar (PedidosYa por defecto Crédito)</div>
+          </div>
+          <button class="btn small primary" id="btnNewClient">➕ Cliente</button>
+        </div>
+        <div class="bd">
+          <div class="fields two">
+            <div>
+              <label>Buscar</label>
+              <input id="cliSearch" placeholder="nombre..." />
+            </div>
+            <div>
+              <label>Filtro</label>
+              <select id="cliFilter">
+                <option value="all">Todos</option>
+                <option value="active">Activos</option>
+                <option value="inactive">Inactivos</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+          <div class="list" id="cliList"></div>
+          <div class="hint" id="cliEmpty" style="display:none">No hay clientes.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCTOS -->
+    <section id="view-productos" class="hide">
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>Productos</h2>
+            <div class="meta">Catálogo (precio y costo)</div>
+          </div>
+          <div class="row" style="gap:8px">
+            <button class="btn small" id="btnImportCosts">⬇️ Importar costos</button>
+            <button class="btn small primary" id="btnNewProd2">➕ Producto</button>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="fields two">
+            <div>
+              <label>Buscar</label>
+              <input id="prodSearch" placeholder="nombre / categoría..." />
+            </div>
+            <div>
+              <label>Filtro</label>
+              <select id="prodFilter">
+                <option value="all">Todos</option>
+                <option value="active">Activos</option>
+                <option value="inactive">Inactivos</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+          <div class="list" id="prodList"></div>
+          <div class="hint" id="prodEmpty" style="display:none">No hay productos.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- NAV -->
+  <div class="footerbar">
+    <div class="nav">
+      <button data-view="ventas" class="active"><div class="ico">🧾</div><div>Ventas</div></button>
+      <button data-view="historial"><div class="ico">🕒</div><div>Historial</div></button>
+      <button data-view="cierre"><div class="ico">💵</div><div>Cierre</div></button>
+      <button data-view="clientes"><div class="ico">👤</div><div>Clientes</div></button>
+      <button data-view="productos"><div class="ico">🍖</div><div>Productos</div></button>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal" id="modal">
+    <div class="sheet">
+      <div class="top">
+        <h3 id="mTitle">—</h3>
+        <button class="btn small ghost" id="mClose">✖</button>
+      </div>
+      <div class="cnt" id="mBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">—</div>
+
+<script>
+
+/* -----------------------------
+   Control Asaditos (offline)
+   - Datos en localStorage
+   - CRUD: productos, clientes
+   - Ventas con carrito (sin stock)
+   - Historial con edición/borrado
+   - Cierre de caja por fecha
+   - Backup Export/Import JSON
+-------------------------------- */
+(() => {
+  const KEY = "control_asaditos_v1";
+  const $ = (q) => document.querySelector(q);
+  const $$ = (q) => Array.from(document.querySelectorAll(q));
+  let tmpEl;
+
+  const fmtGs = (n) => {
+    const v = Number(n || 0);
+    // Formato tipo: 12.345.000
+    return "Gs " + v.toLocaleString("es-PY", { maximumFractionDigits: 0 });
+  };
+
+  const isoLocalDate = (d=new Date()) => {
+    // yyyy-mm-dd in local timezone
+    const z = new Date(d.getTime() - d.getTimezoneOffset()*60000);
+    return z.toISOString().slice(0,10);
+  };
+
+  const isoLocalDT = (d=new Date()) => {
+    const z = new Date(d.getTime() - d.getTimezoneOffset()*60000);
+    return z.toISOString().slice(0,16);
+  };
+
+  const uid = () => Math.random().toString(16).slice(2) + Date.now().toString(16);
+
+  const toast = (msg) => {
+    const t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toast._tm);
+    toast._tm = setTimeout(() => t.classList.remove("show"), 1800);
+  };
+
+  const modal = {
+    el: $("#modal"),
+    title: $("#mTitle"),
+    body: $("#mBody"),
+    open(title, html){
+      this.title.textContent = title;
+      this.body.innerHTML = html;
+      this.el.classList.add("show");
+      document.body.style.overflow = "hidden";
+    },
+    close(){
+      // si cerramos el modal Sync, apagamos el modo UI de sync
+      try{ if(this.el.dataset && this.el.dataset.mode==="sync"){ _syncUiActive=false; this.el.dataset.mode=""; } }catch(e){}
+      this.el.classList.remove("show");
+      document.body.style.overflow = "";
+    }
+  };
+  $("#mClose").addEventListener("click", () => modal.close());
+  $("#modal").addEventListener("click", (e) => {
+    if (e.target.id === "modal") modal.close();
+  });
+
+  const store = {
+    data: null,
+    load(){
+      let raw = null;
+      try { raw = localStorage.getItem(KEY); }
+      catch(e){ raw = null; }
+      if(!raw){
+        try { raw = sessionStorage.getItem(KEY); }
+        catch(e){ raw = null; }
+      }
+      if (raw){
+        try{ this.data = JSON.parse(raw); }
+        catch(e){ this.data = null; }
+      }
+      if (!this.data || typeof this.data !== "object"){
+        this.data = seedData();
+        this.safeSave();
+      }
+      // ensure arrays/objects
+      this.data.products ||= [];
+      this.data.clients ||= [];
+      this.data.sales ||= [];
+      this.data.closes ||= [];
+      this.data.expenses ||= [];
+      this.data.settings ||= { currency: "Gs", business: "Asaditos", tablesCount: 12 };
+      this.data.tables ||= { count: this.data.settings.tablesCount || 12, orders: {} };
+      this.data.inventory ||= { sessions: [], current: null, carryEnabled: true };
+      // normalize tables count
+      if (!this.data.tables.count) this.data.tables.count = this.data.settings.tablesCount || 12;
+      if (!this.data.tables.orders) this.data.tables.orders = {};
+
+      // add missing default products for older stores
+      ensureDefaultProducts();
+    },
+
+    save(){
+      this.safeSave();
+    },
+    safeSave(){
+      try{ bumpRev(); this.data.meta.dirty = true; }catch(e){}
+      try{ localStorage.setItem(KEY, JSON.stringify(this.data)); }
+      catch(e){ /* localStorage bloqueado */ }
+      try{ sessionStorage.setItem(KEY, JSON.stringify(this.data)); }
+      catch(e){ /* sessionStorage bloqueado */ }
+      try{ if(cloudReady()) scheduleCloudPush(); }catch(e){}
+    },
+    
+
+    reset(){
+      try{ localStorage.removeItem(KEY); } catch(e){}
+      this.data = seedData();
+      this.safeSave();
+    },
+};
+
+  function seedData(){
+    // Productos base (podés editar y agregar desde la pestaña Productos)
+    const products = [
+      { id: uid(), name: "ASADITO CARNE", category: "Asaditos", price: 5000, cost: 3500, active: true },
+      { id: uid(), name: "ASADITO POLLO", category: "Asaditos", price: 5000, cost: 0, active: true },
+      { id: uid(), name: "ASADITO CERDO", category: "Asaditos", price: 5000, cost: 3000, active: true },
+      { id: uid(), name: "CHORIQUEZO", category: "Asaditos", price: 6000, cost: 3500, active: true },
+      { id: uid(), name: "PICANTE BESITO", category: "Extras", price: 5000, cost: 2200, active: true },
+      { id: uid(), name: "ALITA DE POLLO", category: "Extras", price: 5000, cost: 3000, active: true },
+      { id: uid(), name: "PARRILLERO", category: "Extras", price: 5000, cost: 3500, active: true },
+      { id: uid(), name: "BUTIFARRA", category: "Extras", price: 5000, cost: 2500, active: true },
+      { id: uid(), name: "MORCILLA OSCHI", category: "Extras", price: 5000, cost: 2800, active: true },
+      { id: uid(), name: "CHINCHULIN", category: "Extras", price: 5000, cost: 2300, active: true },
+      { id: uid(), name: "MUSLO DE POLLO", category: "Extras", price: 15000, cost: 8800, active: true },
+
+      { id: uid(), name: "COCA 250ml", category: "Bebidas", price: 4000, cost: 3500, active: true },
+      { id: uid(), name: "PULP 250", category: "Bebidas", price: 4000, cost: 0, active: true },
+      { id: uid(), name: "AGUA 500ml", category: "Bebidas", price: 5000, cost: 0, active: true },
+      { id: uid(), name: "HIELO 1 KILO", category: "Insumos", price: 1000, cost: 0, active: true },
+
+      { id: uid(), name: "COCA 500ml", category: "Bebidas", price: 8000, cost: 0, active: true },
+      { id: uid(), name: "COCA ZERO 500", category: "Bebidas", price: 8000, cost: 0, active: true },
+      { id: uid(), name: "FANTA NARANJA 500", category: "Bebidas", price: 8000, cost: 0, active: true },
+      { id: uid(), name: "OURO LITRO", category: "Bebidas", price: 10000, cost: 0, active: true },
+
+      { id: uid(), name: "COCA 1L RET", category: "Bebidas", price: 8000, cost: 0, active: true },
+      { id: uid(), name: "COCA 1L DES", category: "Bebidas", price: 10000, cost: 0, active: true },
+      { id: uid(), name: "COCA 1.5 RET", category: "Bebidas", price: 10000, cost: 0, active: true },
+      { id: uid(), name: "COCA 1.5 DES", category: "Bebidas", price: 16000, cost: 0, active: true },
+      { id: uid(), name: "COCA 2L RET", category: "Bebidas", price: 12000, cost: 0, active: true },
+      { id: uid(), name: "COCA 2L DES", category: "Bebidas", price: 18000, cost: 0, active: true },
+
+      { id: uid(), name: "MISIONERO", category: "Bebidas", price: 6000, cost: 0, active: true },
+    ];
+    const clients = [
+      { id: uid(), name: "Ocasional", type: "Local", defaultPay: "Efectivo", active: true, notes: "" },
+      { id: uid(), name: "PedidosYa", type: "Delivery", defaultPay: "Crédito", active: true, notes: "Por defecto va a Crédito" },
+    ];
+    return {
+      version: 2,
+      createdAt: new Date().toISOString(),
+      settings: { currency: "Gs", business: "Asaditos" },
+      products,
+      clients,
+      sales: [],
+      closes: [],
+      expenses: [],
+      tables: { count: 12, orders: {} },
+      inventory: { sessions: [], currentSessionId: null }
+    };
+  }
+
+  // Productos base para migración (si ya existía un store viejo, agregamos los faltantes sin pisar lo que ya editaste)
+  const DEFAULT_PRODUCTS = [
+    { name: "ASADITO CARNE", category: "Asaditos", price: 5000, cost: 3500 },
+    { name: "ASADITO POLLO", category: "Asaditos", price: 5000, cost: 0 },
+    { name: "ASADITO CERDO", category: "Asaditos", price: 5000, cost: 3000 },
+    { name: "CHORIQUEZO", category: "Asaditos", price: 6000, cost: 3500 },
+    { name: "PICANTE BESITO", category: "Extras", price: 5000, cost: 2200 },
+    { name: "ALITA DE POLLO", category: "Extras", price: 5000, cost: 3000 },
+    { name: "PARRILLERO", category: "Extras", price: 5000, cost: 3500 },
+    { name: "BUTIFARRA", category: "Extras", price: 5000, cost: 2500 },
+    { name: "MORCILLA OSCHI", category: "Extras", price: 5000, cost: 2800 },
+    { name: "CHINCHULIN", category: "Extras", price: 5000, cost: 2300 },
+    { name: "MUSLO DE POLLO", category: "Extras", price: 15000, cost: 8800 },
+    { name: "COCA 250ml", category: "Bebidas", price: 4000, cost: 3500 },
+    { name: "COCA 500ml", category: "Bebidas", price: 8000, cost: 0 },
+    { name: "COCA 1L RET", category: "Bebidas", price: 8000, cost: 0 },
+    { name: "COCA 1L DES", category: "Bebidas", price: 10000, cost: 0 },
+    { name: "COCA 1.5 RET", category: "Bebidas", price: 10000, cost: 0 },
+    { name: "COCA 1.5 DES", category: "Bebidas", price: 16000, cost: 0 },
+    { name: "COCA 2L RET", category: "Bebidas", price: 12000, cost: 0 },
+    { name: "COCA 2L DES", category: "Bebidas", price: 18000, cost: 0 },
+    { name: "COCA ZERO 500", category: "Bebidas", price: 8000, cost: 0 },
+    { name: "FANTA NARANJA 500", category: "Bebidas", price: 8000, cost: 0 },
+    { name: "OURO LITRO", category: "Bebidas", price: 10000, cost: 0 },
+    { name: "PULP 250", category: "Bebidas", price: 4000, cost: 0 },
+    { name: "AGUA 500ml", category: "Bebidas", price: 5000, cost: 0 },
+    { name: "HIELO 1 KILO", category: "Insumos", price: 1000, cost: 0 },
+    { name: "MISIONERO", category: "Bebidas", price: 6000, cost: 0 },
+  ];
+
+  function normalizeName(s){ return String(s||"").trim().toUpperCase(); }
+
+  function ensureDefaultProducts(){
+    if (!store.data) return;
+    store.data.products ||= [];
+    const existing = new Map(store.data.products.map(p => [normalizeName(p.name), p]));
+    let added = 0;
+    for (const tpl of DEFAULT_PRODUCTS){
+      const key = normalizeName(tpl.name);
+      if (!existing.has(key)){
+        store.data.products.push({ id: uid(), name: tpl.name, category: tpl.category, price: tpl.price, cost: tpl.cost, active: true });
+        added++;
+      }
+    }
+    if (added) store.safeSave();
+  }
+
+  const state = {
+    view: "ventas",
+    cart: [], // [{productId, qty}]
+    saleEditingId: null,
+    selectedTable: null, // null = sin mesa, else "M1"...
+    loadedTableId: null // if cart was loaded from a mesa pendiente
+  };
+
+// ---------- Sincronización (JSONBin) ----------
+const DEVICE_ID = (() => {
+  try{
+    const k="ASADITOS_DEVICE_ID";
+    const v = localStorage.getItem(k);
+    if(v) return v;
+    const n = (crypto?.randomUUID?.() || (Math.random().toString(16).slice(2)+Date.now().toString(16))).slice(0,36);
+    localStorage.setItem(k, n);
+    return n;
+  }catch{
+    return "device-"+Math.random().toString(16).slice(2);
+  }
+})();
+
+
+// ------------------------------
+// Supabase Sync (reemplaza JSONBin)
+// ------------------------------
+const SUPABASE_URL = "https://ekcbiwgdjasdmrpzzkaj.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_k3QLJuo9hzSINc4XEaDg3Q_onUFxhs3";
+const sb = (window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
+
+// Identificador de "local" (podés cambiarlo si algún día tenés otro local)
+const CLOUD_SHOP_ID = "asaditos";
+
+// Ocultar UI de Sync (ahora es automático con Supabase)
+document.addEventListener("DOMContentLoaded", () => {
+  ["btnSync","bkOpenSync","openSync","btnCloud","cloudBadge","syncBadge"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = "none";
+  });
+});
+function ensureMeta(){
+  store.data.meta ||= {};
+  store.data.meta.rev ||= 1;
+  store.data.meta.updatedAt ||= Date.now();
+  store.data.meta.deviceId ||= DEVICE_ID;
+}
+
+function bumpRev(){
+  ensureMeta();
+  store.data.meta.rev = (Number(store.data.meta.rev)||0) + 1;
+  store.data.meta.updatedAt = Date.now();
+  store.data.meta.deviceId = DEVICE_ID;
+}
+
+function cloudCfg(){
+  const s = store.data?.settings || {};
+  return {
+    enabled: (s.cloudEnabled === undefined ? true : !!s.cloudEnabled),
+    pullEverySec: Number(s.cloudPullEverySec || 5),
+  };
+}
+
+function cloudReady(){
+  return !!sb;
+}
+
+// Persistencia extra de configuración Sync (por si el store se resetea / falla localStorage)
+const SYNC_CFG_KEY = "CG_SYNC_CFG_V1";
+function readSyncCfgFallback(){
+  try{
+    const raw = localStorage.getItem(SYNC_CFG_KEY) || sessionStorage.getItem(SYNC_CFG_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function writeSyncCfgFallback(cfg){
+  try{ localStorage.setItem(SYNC_CFG_KEY, JSON.stringify(cfg)); }catch(e){}
+  try{ sessionStorage.setItem(SYNC_CFG_KEY, JSON.stringify(cfg)); }catch(e){}
+}
+function hydrateSyncSettingsFromFallback(){
+  try{
+    if(!store.data) return;
+    store.data.settings = store.data.settings && typeof store.data.settings==="object" ? store.data.settings : {};
+    const s = store.data.settings;
+    // Si ya está completo, no tocamos
+    if(s.cloudEnabled && s.cloudBinId && (s.cloudApiKey || s.cloudMasterKey)) return;
+    const fb = readSyncCfgFallback();
+    if(!fb) return;
+    // Solo hidratamos si hay datos válidos
+    if(fb.cloudBinId && fb.cloudApiKey){
+      s.cloudEnabled = !!fb.cloudEnabled;
+      s.cloudBinId = fb.cloudBinId;
+      s.cloudKeyType = fb.cloudKeyType || "access";
+      s.cloudApiKey = fb.cloudApiKey;
+      if(s.cloudKeyType==="master") s.cloudMasterKey = s.cloudApiKey;
+      s.cloudPullEverySec = Number(fb.cloudPullEverySec || 10);
+    }
+  }catch(e){}
+}
+
+async function cloudFetchRecord(){
+  if(!sb) throw new Error("Cloud GET ERR: Supabase no inicializado");
+  const { data, error, status } = await sb
+    .from("cloud_state")
+    .select("record")
+    .eq("shop_id", CLOUD_SHOP_ID)
+    .maybeSingle();
+  if(error && status !== 406){
+    throw new Error(`Cloud GET ${status||"ERR"}`);
+  }
+  return (data && data.record) ? data.record : null;
+}
+
+async function cloudPutRecord(record){
+  if(!sb) throw new Error("Cloud PUT ERR: Supabase no inicializado");
+  const payload = { shop_id: CLOUD_SHOP_ID, record, updated_at: new Date().toISOString() };
+  const { error, status } = await sb
+    .from("cloud_state")
+    .upsert(payload, { onConflict: "shop_id" });
+  if(error){
+    throw new Error(`Cloud PUT ${status||"ERR"}`);
+  }
+  return true;
+}
+
+
+// Sync status UI
+let _syncUiActive = false; // solo cuando el modal Sync está abierto
+let _syncState = "off";
+let _syncMsg = "OFF";
+let _conflictRemote = null;
+
+function setSyncStatus(state, msg){
+  _syncState = state || "idle";
+  _syncMsg = msg || "";
+
+  // Solo actualizamos UI si el modal Sync está abierto (para no mover la pantalla en el móvil)
+  if(!_syncUiActive) return;
+
+  const btn = document.querySelector("#btnSync");
+  const badge = document.querySelector("#syncBadge");
+  const badgeVisible = !!(btn && !btn.classList.contains("hide"));
+
+  if(badge && badgeVisible){
+    badge.classList.remove("badge-off","badge-idle","badge-pushing","badge-ok","badge-err","badge-conflict");
+    const cls = state==="ok" ? "badge-ok"
+      : state==="err" ? "badge-err"
+      : state==="conflict" ? "badge-conflict"
+      : state==="pushing" ? "badge-pushing"
+      : state==="off" ? "badge-off"
+      : "badge-idle";
+    badge.classList.add(cls);
+    badge.textContent = (state==="off" ? "OFF" :
+      state==="pushing" ? "SUBIENDO" :
+      state==="ok" ? "OK" :
+      state==="err" ? "ERROR" :
+      state==="conflict" ? "CONFLICTO" : "SYNC");
+  }
+
+  const line = document.querySelector("#syncStatusLine");
+  if(line){
+    line.textContent = `${msg || ""}`;
+  }
+}
+
+function syncStatusText(){
+  if(!_syncState) return "OFF";
+  return `${_syncState.toUpperCase()} ${_syncMsg||""}`.trim();
+}
+let _pushTimer=null, _isPushing=false, _lastPulledRev=0, _pullTimer=null;
+function scheduleCloudPush(){
+  if(!cloudReady()) return;
+  if(_pushTimer) clearTimeout(_pushTimer);
+  _pushTimer = setTimeout(async () => {
+    await cloudPushNow(); // reusa el mismo código, con lock
+  }, 600);
+}
+
+// Push inmediato (para cambios importantes como borrar/editar). No depende de abrir el modal.
+async function cloudPushNow(){
+  if(!cloudReady()) return false;
+  if(_isPushing) return false;
+  _isPushing = true;
+  try{
+    ensureMeta();
+    setSyncStatus("pushing","Subiendo…");
+    await cloudPutRecord(store.data);
+    try{ store.data.meta.dirty = false; }catch(e){}
+    if(store && typeof store.safeSave==="function") store.safeSave();
+    setSyncStatus("ok","OK");
+    return true;
+  }catch(e){
+    // dejamos dirty=true para reintentar
+    console.warn(e);
+    setSyncStatus("err","Error");
+    return false;
+  }finally{
+    _isPushing = false;
+  }
+}
+
+
+function ensureTombstones(){
+  ensureMeta();
+  store.data.meta.tombstones ||= {};
+  return store.data.meta.tombstones;
+}
+window.markDeleted = function(kind, id){
+  try{
+    const t = ensureTombstones();
+    t[kind] ||= {};
+    t[kind][id] = Date.now();
+    store.data.meta.updatedAt = Date.now();
+    store.data.meta.dirty = true;
+    if(store && typeof store.safeSave==="function") store.safeSave();
+  }catch(e){}
+}
+function mergeTombstoneMaps(a,b){
+  const out = {};
+  const ka = (a && typeof a==="object") ? Object.keys(a) : [];
+  const kb = (b && typeof b==="object") ? Object.keys(b) : [];
+  for(const k of new Set([...ka,...kb])){
+    const ma = (a && a[k] && typeof a[k]==="object") ? a[k] : {};
+    const mb = (b && b[k] && typeof b[k]==="object") ? b[k] : {};
+    const merged = {};
+    for(const id of new Set([...Object.keys(ma),...Object.keys(mb)])){
+      merged[id] = Math.max(Number(ma[id]||0), Number(mb[id]||0));
+    }
+    out[k] = merged;
+  }
+  return out;
+}
+function applyTombstones(arr, tombstones, kind){
+  const map = tombstones?.[kind];
+  if(!map || !Array.isArray(arr)) return arr || [];
+  return (arr||[]).filter(it=>{
+    const tsDel = Number(map[it?.id]||0);
+    if(!tsDel) return true;
+    const tsIt = Number(it?.updatedAt||it?.createdAt||it?.at||it?.dt||it?.endedAt||it?.startedAt||0);
+    return tsIt > tsDel; // si el item es más nuevo que el borrado, lo dejamos; si no, lo consideramos borrado
+  });
+}
+
+function mergeRemoteLocal(remote, local){
+  // merge básico por ID (ventas, cierres, inventario sessions) + mesas por updatedAt
+  function clone(obj){
+    try{ return structuredClone(obj); }catch{ return JSON.parse(JSON.stringify(obj)); }
+  }
+  function mergeById(arrA, arrB){
+    const m = new Map();
+    (arrA||[]).forEach(it => it && it.id && m.set(it.id, it));
+    (arrB||[]).forEach(it => {
+      if(!it || !it.id) return;
+      const cur = m.get(it.id);
+      if(!cur) m.set(it.id, it);
+      else{
+        const ta = Number(cur.updatedAt || cur.dt || 0);
+        const tb = Number(it.updatedAt || it.dt || 0);
+        if(tb > ta) m.set(it.id, it);
+      }
+    });
+    return Array.from(m.values());
+  }
+
+  const merged = clone(remote || {});
+  merged.settings ||= {};
+  merged.products ||= [];
+  merged.clients ||= [];
+
+  // tombstones (borrados) para evitar que vuelvan a aparecer
+  merged.meta ||= {};
+  merged.meta.tombstones = mergeTombstoneMaps(remote?.meta?.tombstones, local?.meta?.tombstones);
+
+  merged.sales = mergeById((remote||{}).sales, (local||{}).sales);
+
+  merged.closes = mergeById((remote||{}).closes, (local||{}).closes);
+
+  merged.expenses = mergeById((remote||{}).expenses, (local||{}).expenses);
+
+
+  // inventario
+  merged.inventory ||= { sessions: [], current: null, carryEnabled: true };
+  merged.inventory.sessions = mergeById((remote?.inventory||{}).sessions, (local?.inventory||{}).sessions);
+  // current: prefer el más nuevo
+  const lcur = local?.inventory?.current;
+  const rcur = remote?.inventory?.current;
+  const lts = Number(lcur?.updatedAt||lcur?.startedAt||0);
+  const rts = Number(rcur?.updatedAt||rcur?.startedAt||0);
+  merged.inventory.current = (lts > rts ? lcur : rcur) || null;
+
+  // settings: prefer el más nuevo
+  const la = Number(local?.meta?.updatedAt||0);
+  const ra = Number(remote?.meta?.updatedAt||0);
+  if(la > ra) merged.settings = local.settings || merged.settings;
+
+  // productos/clientes: unir por id, preferir más nuevo
+  merged.products = mergeById((remote||{}).products, (local||{}).products);
+
+  merged.clients = mergeById((remote||{}).clients, (local||{}).clients);
+  // aplicar borrados
+  merged.sales = applyTombstones(merged.sales, merged.meta.tombstones, "sales");
+  merged.closes = applyTombstones(merged.closes, merged.meta.tombstones, "closes");
+  merged.products = applyTombstones(merged.products, merged.meta.tombstones, "products");
+  merged.clients = applyTombstones(merged.clients, merged.meta.tombstones, "clients");
+  merged.expenses = applyTombstones(merged.expenses||[], merged.meta.tombstones, "expenses");
+
+
+  // mesas
+  merged.tables ||= { count: (merged.settings?.tablesCount||12), orders: {} };
+  merged.tables.orders ||= {};
+  const ro = (remote?.tables||{}).orders || {};
+  const lo = (local?.tables||{}).orders || {};
+  const keys = new Set([...Object.keys(ro), ...Object.keys(lo)]);
+  for(const k of keys){
+    const a = ro[k], b = lo[k];
+    if(!a) merged.tables.orders[k]=b;
+    else if(!b) merged.tables.orders[k]=a;
+    else{
+      const ta = Number(a.updatedAt||a.openedAt||0);
+      const tb = Number(b.updatedAt||b.openedAt||0);
+      merged.tables.orders[k] = (tb>ta? b : a);
+    }
+  }
+  // aplicar borrados (tombstones) a mesas para que una mesa cancelada no reaparezca
+  const tmapTables = merged.meta?.tombstones?.tables || {};
+  for(const tid of Object.keys(merged.tables.orders||{})){
+    const o = merged.tables.orders[tid];
+    const tsDel = Number(tmapTables[tid]||0);
+    if(!tsDel) continue;
+    const tsIt = Number(o?.updatedAt||o?.openedAt||0);
+    if(tsIt <= tsDel) delete merged.tables.orders[tid];
+  }
+
+  merged.tables.count = merged.tables.count || merged.settings?.tablesCount || 12;
+
+  // meta
+  merged.meta ||= {};
+  merged.meta.rev = Math.max(Number(remote?.meta?.rev||0), Number(local?.meta?.rev||0)) + 1;
+  merged.meta.updatedAt = Date.now();
+  merged.meta.deviceId = DEVICE_ID;
+  merged.meta.dirty = true;
+
+  return merged;
+}
+
+async function autoResolveConflict(remote){
+  try{
+    const merged = mergeRemoteLocal(remote, store.data);
+    store.data = merged;
+    ensureMeta();
+    store.saveLocal?.();
+    renderAll();
+    setSyncStatus("pushing","Auto-merge…");
+    await cloudPutRecord(store.data);
+    store.data.meta.dirty = false;
+    if(store && typeof store.safeSave==="function") store.safeSave();
+    setSyncStatus("ok","Auto-sync OK");
+    _conflictRemote = null;
+    return true;
+  }catch(e){
+    console.warn(e);
+    setSyncStatus("conflict","Necesita resolver");
+    _conflictRemote = remote;
+    toast("⚠️ Conflicto: no se pudo auto-resolver. Abrí ☁️ Sync");
+    return false;
+  }
+}
+
+async function cloudPullOnce(){
+  if(!cloudReady()) return;
+  try{
+    const remote = await cloudFetchRecord();
+    if(!remote) return;
+    const rrev = Number(remote?.meta?.rev || 0);
+    const lrev = Number(store.data?.meta?.rev || 0);
+    if(rrev > lrev){
+      const localDirty = !!(store.data?.meta?.dirty);
+      if(localDirty){
+        // Auto-resolver (merge) para que se actualice solo entre dispositivos
+        const ok = await autoResolveConflict(remote);
+        if(!ok) return;
+        // Ya quedamos en la versión merged (y se subió). No pisar con el remote viejo.
+        _lastPulledRev = Number(store.data?.meta?.rev || rrev);
+        return;
+      }
+      store.data = remote;
+      ensureMeta();
+      store.saveLocal?.();
+      state.view = state.view || "ventas";
+      renderAll();
+      setSyncStatus("ok","Actualizado");
+      toast("Datos actualizados desde nube ☁️");
+    }
+    _lastPulledRev = rrev;
+  }catch(e){
+    console.warn(e);
+  }
+}
+
+function startCloudPull(){
+  stopCloudPull();
+  if(!cloudReady()) return;
+  const sec = Math.max(5, cloudCfg().pullEverySec || 10);
+  _pullTimer = setInterval(cloudPullOnce, sec*1000);
+}
+function stopCloudPull(){
+  if(_pullTimer){ clearInterval(_pullTimer); _pullTimer=null; }
+}
+
+// ---------- Background Sync Manager (auto, robust) ----------
+let _bgSyncMgr = null;
+let _bgPulling = false;
+let _bgPushing = false;
+let _bgLastTick = 0;
+
+async function bgSyncTick(reason){
+  if(!cloudReady()) { stopCloudPull(); return; }
+
+  // evitar ticks demasiado seguidos (algunos navegadores disparan focus/visibility en ráfaga)
+  const now = Date.now();
+  if(now - _bgLastTick < 500) return;
+  _bgLastTick = now;
+
+  // Pull (traer de nube) - con lock
+  if(!_bgPulling){
+    _bgPulling = true;
+    try{ await cloudPullOnce(); }catch(e){ /* silencioso */ }
+    finally{ _bgPulling = false; }
+  }
+
+  // Push (subir a nube) - si hay cambios pendientes
+  if(store?.data?.meta?.dirty && !_bgPushing){
+    _bgPushing = true;
+    try{ await cloudPushNow?.(); }catch(e){ /* cloudPushNow puede no existir en algunas builds */ }
+    finally{ _bgPushing = false; }
+  }
+}
+
+function startBgSyncMgr(){
+  if(_bgSyncMgr) return;
+  // Tick rápido para que se sienta "en tiempo real"
+  _bgSyncMgr = setInterval(() => { bgSyncTick("interval"); }, 2000);
+
+  // Primer tick inmediato
+  setTimeout(() => bgSyncTick("boot"), 50);
+
+  // Eventos que ayudan mucho en móvil/PC
+  window.addEventListener("online", () => bgSyncTick("online"));
+  window.addEventListener("focus", () => bgSyncTick("focus"));
+  document.addEventListener("visibilitychange", () => {
+    if(document.visibilityState === "visible") bgSyncTick("visible");
+  });
+}
+
+function stopBgSyncMgr(){
+  if(_bgSyncMgr){ clearInterval(_bgSyncMgr); _bgSyncMgr = null; }
+}
+
+
+
+  // ---------- Core selectors ----------
+  const els = {
+    saleClient: $("#saleClient"),
+    saleChannel: $("#saleChannel"),
+    salePay: $("#salePay"),
+    saleDT: $("#saleDT"),
+    saleNotes: $("#saleNotes"),
+    paySuggested: $("#paySuggested"),
+    catChips: $("#catChips"),
+    prodGrid: $("#prodGrid"),
+    cartList: $("#cartList"),
+    cartMeta: $("#cartMeta"),
+    cartTotal: $("#cartTotal"),
+    cartCost: $("#cartCost"),
+    cashAvailableToday: $("#cashAvailableToday"),
+    cartProfit: $("#cartProfit"),
+    badgeToday: $("#badgeToday"),
+    // historial
+    hFrom: $("#hFrom"),
+    hTo: $("#hTo"),
+    hSearch: $("#hSearch"),
+    histList: $("#histList"),
+    histMeta: $("#histMeta"),
+    histEmpty: $("#histEmpty"),
+    kpiSales: $("#kpiSales"),
+    kpiCash: $("#kpiCash"),
+    kpiCard: $("#kpiCard"),
+    kpiCredit: $("#kpiCredit"),
+    kpiCost: $("#kpiCost"),
+    kpiProfit: $("#kpiProfit"),
+    // cierre
+    cDate: $("#cDate"),
+    cNote: $("#cNote"),
+    cCash: $("#cCash"),
+    cCard: $("#cCard"),
+    cCredit: $("#cCredit"),
+    cCashExp: $("#cCashExp"),
+    cCardExp: $("#cCardExp"),
+    cCreditExp: $("#cCreditExp"),
+    cCreditPyExp: $("#cCreditPyExp"),
+    cCreditOtherExp: $("#cCreditOtherExp"),
+    cExpTot: $("#cExpTot"),
+    cCntTot: $("#cCntTot"),
+    cDiff: $("#cDiff"),
+    cDiffBox: $("#cDiffBox"),
+    closeList: $("#closeList"),
+    closeEmpty: $("#closeEmpty"),
+    // clientes/productos
+    cliSearch: $("#cliSearch"),
+    cliFilter: $("#cliFilter"),
+    cliList: $("#cliList"),
+    cliEmpty: $("#cliEmpty"),
+    prodSearch: $("#prodSearch"),
+    prodFilter: $("#prodFilter"),
+    prodList: $("#prodList"),
+    prodEmpty: $("#prodEmpty"),
+    // mesas + inventario
+    tableChips: $("#tableChips"),
+    pendingTables: $("#pendingTables"),
+    pendingEmpty: $("#pendingEmpty"),
+    invStatus: $("#invStatus"),
+    btnSavePending: $("#btnSavePending"),
+  };
+
+  // ---------- Navigation ----------
+  
+function renderAll(){
+  try{ renderHeader?.(); }catch{}
+  try{ renderVentas?.(); }catch{}
+  try{ renderProductos?.(); }catch{}
+  try{ renderHistorial?.(); }catch{}
+  try{ renderCierre?.(); }catch{}
+}
+
+function setView(name){
+    state.view = name;
+    $$("section[id^='view-']").forEach(s => s.classList.add("hide"));
+    $("#view-" + name).classList.remove("hide");
+    $$(".nav button").forEach(b => b.classList.toggle("active", b.dataset.view === name));
+
+    // Sync UI: mostrar solo en la vista principal (ventas) para que en el celu no moleste.
+    const btnSync = document.querySelector("#btnSync");
+    if(btnSync){
+      btnSync.classList.add("hide");
+      }
+
+    if (name === "historial") renderHistorial();
+    if (name === "cierre") renderCierre();
+    if (name === "clientes") renderClientes();
+    if (name === "productos") renderProductos();
+  }
+  $$(".nav button").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
+
+  // ---------- Data helpers ----------
+  function activeProducts(){
+    return (store.data?.products || []).filter(p => p.active !== false);
+  }
+  function activeClients(){
+    return (store.data?.clients || []).filter(c => c.active !== false);
+  }
+  function getProduct(id){
+    return (store.data?.products || []).find(p => p.id === id);
+  }
+  function getClient(id){
+    return (store.data?.clients || []).find(c => c.id === id);
+  }
+  function saleTotals(items){
+    let total = 0, cost = 0;
+    for (const it of items){
+      const p = getProduct(it.productId);
+      const qty = Number(it.qty || 0);
+      const price = Number(p?.price || 0);
+      const pcost = Number(p?.cost || 0);
+      total += qty * price;
+      cost += qty * pcost;
+    }
+    return { total, cost, profit: total - cost };
+  }
+  function cartItemsExpanded(){
+    return state.cart
+      .filter(x => x.qty > 0)
+      .map(x => ({ ...x, product: getProduct(x.productId) }))
+      .filter(x => x.product);
+  }
+
+  // ---------- Ventas UI ----------
+  function ensureDefaults(){
+    els.saleDT.value = isoLocalDT(new Date());
+    els.badgeToday.textContent = "📅 " + new Date().toLocaleDateString("es-PY");
+    // Default client: Ocasional if exists, else first active
+    const ac = activeClients();
+    if (ac.length){
+      const hasOcc = ac.find(c => c.name.toLowerCase() === "ocasional");
+      els.saleClient.value = (hasOcc?.id || ac[0].id);
+    }
+    updateSuggestedPay();
+  }
+
+  function updateSuggestedPay(){
+    const client = getClient(els.saleClient.value);
+    const suggested = client?.name === "PedidosYa" ? "Crédito" : (client?.defaultPay || "Efectivo");
+    els.paySuggested.textContent = suggested || "—";
+    // auto-set payment to suggested unless user already changed it manually in this session
+    // (simple rule: if payment empty or matches old suggestion, set it)
+    if (!els.salePay.dataset.manual || els.salePay.value === els.salePay.dataset.lastSuggested){
+      els.salePay.value = suggested;
+    }
+    els.salePay.dataset.lastSuggested = suggested;
+    // If channel is PedidosYa, keep it consistent (optional)
+    if (client?.name === "PedidosYa") els.saleChannel.value = "PedidosYa";
+  }
+
+  els.saleClient.addEventListener("change", () => {
+    updateSuggestedPay();
+    renderCart();
+  });
+  els.salePay.addEventListener("change", () => {
+    els.salePay.dataset.manual = "1";
+    renderCart();
+  });
+
+  function categories(){
+    const prods = activeProducts();
+    const set = new Set(prods.map(p => (p.category || "Otros").trim() || "Otros"));
+    // Prefer your top categories first
+    const pref = ["Carne","Cerdo","Choriqueso","Parrillero","Pollo","Bebidas","Extras","Combo","Otros"];
+    const arr = Array.from(set);
+    arr.sort((a,b)=>{
+      const ia = pref.indexOf(a), ib = pref.indexOf(b);
+      if (ia !== -1 && ib !== -1) return ia-ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      return a.localeCompare(b, "es");
+    });
+    return ["Todos", ...arr];
+  }
+
+  function renderCategories(selected="Todos"){
+    els.catChips.innerHTML = "";
+    categories().forEach(cat => {
+      const b = document.createElement("div");
+      b.className = "chip" + (cat === selected ? " active" : "");
+      b.textContent = cat;
+      b.addEventListener("click", () => {
+        renderCategories(cat);
+        renderProductGrid(cat);
+      });
+      els.catChips.appendChild(b);
+    });
+  }
+
+  function renderProductGrid(cat="Todos"){
+    const prods = activeProducts()
+      .filter(p => cat === "Todos" ? true : ((p.category||"Otros") === cat))
+      .sort((a,b)=>{
+        // show the "asaditos" categories first by pref list then name
+        const pref = ["Carne","Cerdo","Choriqueso","Parrillero","Pollo","Bebidas","Extras","Combo","Otros"];
+        const ia = pref.indexOf(a.category||"Otros");
+        const ib = pref.indexOf(b.category||"Otros");
+        if (ia !== -1 && ib !== -1 && ia !== ib) return ia - ib;
+        if (ia !== -1 && ib === -1) return -1;
+        if (ib !== -1 && ia === -1) return 1;
+        return a.name.localeCompare(b.name, "es");
+      });
+
+    els.prodGrid.innerHTML = "";
+    if (!prods.length){
+      els.prodGrid.innerHTML = `<div class="hint">No hay productos en esta categoría. Creá uno con “➕ Producto”.</div>`;
+      return;
+    }
+    for (const p of prods){
+      const div = document.createElement("div");
+      div.className = "prod";
+      div.innerHTML = `
+        <div class="name">${escapeHtml(p.name)}</div>
+        <div class="cat">${escapeHtml(p.category || "Otros")}</div>
+        <div class="price">${fmtGs(p.price)}</div>
+        ${(() => { const r = remainingOf(p.id); return (r === null) ? "" : `<div class="tiny">Stock: <b>${r}</b></div>`; })()}
+      `;
+      div.addEventListener("click", () => addToCart(p.id));
+      els.prodGrid.appendChild(div);
+    }
+  }
+  
+  function tableWarnMin(){ return Number((store.data?.settings?.tableWarnMin ?? 15)); }
+  function tableOverdueMin(){ return Number((store.data?.settings?.tableOverdueMin ?? 45)); }
+
+  function minutesSince(iso){
+    if (!iso) return 0;
+    const t = new Date(iso).getTime();
+    return Math.max(0, Math.floor((Date.now() - t)/60000));
+  }
+
+  function tableState(tableId){
+    const o = getTableOrder(tableId);
+    if (!o || o.status !== "open") return { cls:"table-free", label:"Libre", mins:0, order:null };
+    const mins = minutesSince(o.createdAt || o.updatedAt);
+    if (mins >= tableOverdueMin()) return { cls:"table-overdue", label:"Demora", mins, order:o };
+    return { cls:"table-pending", label:"Pendiente", mins, order:o };
+  }
+
+  function quickPayTable(tableId){
+    const o = getTableOrder(tableId);
+    if (!o || o.status !== "open") return toast("Mesa libre");
+    if (state.cart.length && !confirm("Tenés un carrito en curso. ¿Reemplazarlo para cobrar esta mesa?")) return;
+    loadTableToCart(tableId);
+    if (!confirm(`¿Cobrar ahora ${tableLabel(tableId)} por ${fmtGs(saleTotals(state.cart).total)}?`)) return;
+    saveSale(); // saveSale detecta loadedTableId y cierra la mesa
+  }
+
+  function updateFloatCash(){
+    const el = $("#floatCashTotal");
+    if (!el) return;
+    const v = numFromInput(els?.cCash?.value || "0");
+    el.textContent = fmtGs(v);
+  }
+
+  function openCashCounterModal(){
+    modal.open("💵 Contador de efectivo", `
+      <div class="hint">Cargá cantidades por billete/moneda. Se actualiza el <b>efectivo contado</b> del Cierre.</div>
+      <div class="sep"></div>
+      <div id="denomGridFloat" class="fields two"></div>
+      <div class="sep"></div>
+      <div class="row" style="justify-content:space-between">
+        <button class="btn ghost" id="btnClearDenomsFloat">Limpiar</button>
+        <div class="money" id="denomTotalFloat">${fmtGs(numFromInput(els.cCash.value||"0"))}</div>
+      </div>
+    `);
+    const grid = $("#denomGridFloat");
+    grid.innerHTML = "";
+    for (const d of DENOMS){
+      const wrap = document.createElement("div");
+      wrap.innerHTML = `
+        <label>${fmtGs(d)} (cant.)</label>
+        <input inputmode="numeric" class="denInpF" data-den="${d}" placeholder="0" />
+      `;
+      grid.appendChild(wrap);
+    }
+    const upd = () => {
+      let total = 0;
+      grid.querySelectorAll(".denInpF").forEach(inp => {
+        const den = Number(inp.dataset.den||0);
+        const qty = numFromInput(inp.value);
+        total += den * qty;
+      });
+      $("#denomTotalFloat").textContent = fmtGs(total);
+      els.cCash.value = String(total);
+      renderCierre();
+      
+    updateFloatCash();updateFloatCash();
+    };
+    grid.querySelectorAll(".denInpF").forEach(inp => inp.addEventListener("input", upd));
+    $("#btnClearDenomsFloat").addEventListener("click", () => {
+      grid.querySelectorAll(".denInpF").forEach(i => i.value = "");
+      upd();
+    });
+  }
+
+// ---------- Mesas (pendientes) ----------
+  function tableIdFromNum(n){ return "M" + String(n); }
+  function tablesCount(){
+    return Number(store.data.settings?.tablesCount || store.data.tables?.count || 12);
+  }
+  function tableLabel(id){
+    if (!id) return "Sin mesa";
+    return "Mesa " + id.replace("M","");
+  }
+  function ensureTables(){
+    store.data.tables ||= { count: tablesCount(), orders: {} };
+    store.data.tables.count = tablesCount();
+    store.data.tables.orders ||= {};
+  }
+  function getTableOrder(tableId){
+    ensureTables();
+    return store.data.tables.orders[tableId] || null;
+  }
+  function setTableOrder(tableId, order){
+    ensureTables();
+    if (order) store.data.tables.orders[tableId] = order;
+    else delete store.data.tables.orders[tableId];
+    if(!order){ try{ window.markDeleted('tables', String(tableId)); }catch(e){} }
+    store.save();
+  }
+  function listPendingTables(){
+    ensureTables();
+    const ids = Object.keys(store.data.tables.orders||{});
+    const arr = ids
+      .map(id => store.data.tables.orders[id])
+      .filter(o => o && o.status === "open")
+      .sort((a,b)=> (a.tableId||"").localeCompare(b.tableId||""));
+    return arr;
+  }
+
+  function renderTableChips(){
+    const count = tablesCount();
+    els.tableChips.innerHTML = "";
+    const makeChip = (label, id) => {
+      const c = document.createElement("div");
+      const st = (id? tableState(id): {cls:"", label:"", mins:0});
+      c.className = "chip " + (st.cls||"") + ((state.selectedTable===id) ? " active" : "");
+if (id){ const st2 = tableState(id); c.textContent = (st2.cls==="table-overdue" ? "🔴 " : (st2.cls==="table-pending" ? "🟡 " : "🟢 ")) + label; }
+      else { c.textContent = label; }
+c.addEventListener("click", () => {
+        state.selectedTable = id;
+        state.loadedTableId = null; // switching table cancels linkage
+        renderTableChips();
+        renderPendingTables();
+        renderCart();
+      });
+      els.tableChips.appendChild(c);
+    };
+    makeChip("Sin mesa", null);
+    for (let i=1;i<=count;i++){
+      const id = tableIdFromNum(i);
+      const ord = getTableOrder(id);
+      const has = !!ord;
+      makeChip((has ? "🔴 " : "") + "Mesa " + i, id);
+    }
+  }
+
+  function renderPendingTables(){
+    const pend = listPendingTables();
+    els.pendingTables.innerHTML = "";
+    els.pendingEmpty.style.display = pend.length ? "none" : "block";
+
+    for (const o of pend){
+      const totals = saleTotals((o.items||[]).map(it => ({productId:it.productId, qty:it.qty})));
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="left">
+          <div class="title">${escapeHtml(tableLabel(o.tableId))} <span class="badge">Pendiente</span></div>
+          <div class="desc">${escapeHtml((o.items||[]).map(it => it.qty+"× "+(getProduct(it.productId)?.name||"Producto")).join(" · ") || "—")}</div>
+          <div class="tiny">${new Date(o.updatedAt||o.createdAt).toLocaleString("es-PY",{dateStyle:"short",timeStyle:"short"})}</div>
+        </div>
+        <div class="right">
+          <div class="money">${fmtGs(totals.total)}</div>
+          <div class="row" style="gap:6px">
+            <button class="btn small" data-act="pay">Cobrar</button>
+            <button class="btn small" data-act="load">Abrir</button>
+            <button class="btn small danger" data-act="clear" title="Cancelar mesa">✖</button>
+          </div>
+        </div>
+      `;
+      div.querySelector('[data-act="pay"]').addEventListener("click", () => quickPayTable(o.tableId));
+      div.querySelector('[data-act="load"]').addEventListener("click", () => loadTableToCart(o.tableId));
+div.querySelector('[data-act="clear"]').addEventListener("click", () => clearTable(o.tableId));
+      els.pendingTables.appendChild(div);
+    }
+  }
+
+  function loadTableToCart(tableId){
+    const o = getTableOrder(tableId);
+    if (!o) return toast("Mesa vacía");
+    if (state.cart.length && !confirm("Tenés un carrito en curso. ¿Reemplazarlo por la mesa pendiente?")) return;
+    state.cart = (o.items||[]).map(it => ({ productId: it.productId, qty: Number(it.qty||0) }));
+    state.selectedTable = tableId;
+    state.loadedTableId = tableId;
+    els.saleNotes.value = o.notes || "";
+    // client/pay/channel from table
+    if (o.clientId) els.saleClient.value = o.clientId;
+    if (o.channel) els.saleChannel.value = o.channel;
+    if (o.pay) { els.salePay.value = o.pay; els.salePay.dataset.manual = "1"; }
+    renderTableChips();
+    renderPendingTables();
+    renderCart();
+    toast("Mesa cargada. Editá el carrito y tocá Actualizar mesa ⏳");
+  }
+
+  function clearTable(tableId){
+    const o = getTableOrder(tableId);
+    if (!o) return;
+    if (!confirm("¿Cancelar esta mesa pendiente? (Se devuelve al inventario)")) return;
+    // revert inventory reservation
+    adjustInventoryForItems(o.items||[], -1);
+    setTableOrder(tableId, null);
+    if (state.loadedTableId === tableId){
+      clearCart();
+      state.selectedTable = null;
+      state.loadedTableId = null;
+      renderTableChips();
+    }
+    renderPendingTables();
+    toast("Mesa cancelada");
+  }
+
+  // ---------- Inventario (jornadas) ----------
+  function currentSession(){
+    const id = store.data.inventory?.currentSessionId;
+    if (!id) return null;
+    return (store.data.inventory.sessions||[]).find(s => s.id === id) || null;
+  }
+
+  function lastClosedSession(){
+    const sessions = (store.data.inventory?.sessions||[]).filter(s => s.closedAt);
+    sessions.sort((a,b)=> new Date(b.closedAt) - new Date(a.closedAt));
+    return sessions[0] || null;
+  }
+
+  function sessionForDate(dateKey){
+    return (store.data.inventory.sessions||[]).find(s => s.dateKey === dateKey && !s.closedAt) || null;
+  }
+
+  function ensureSessionCounts(session){
+    session.counts ||= {};
+    for (const p of activeProducts()){
+      session.counts[p.id] ||= { start: 0, sold: 0 };
+    }
+  }
+
+  function remainingOf(productId){
+    const s = currentSession();
+    if (!s) return null;
+    ensureSessionCounts(s);
+    const c = s.counts[productId] || { start:0, sold:0 };
+    return Number(c.start||0) - Number(c.sold||0);
+  }
+
+  function adjustInventoryForItems(items, direction=1){
+    const s = currentSession();
+    if (!s) return;
+    ensureSessionCounts(s);
+    for (const it of items){
+      const pid = it.productId;
+      const q = Number(it.qty||0) * direction;
+      if (!s.counts[pid]) s.counts[pid] = { start:0, sold:0 };
+      s.counts[pid].sold = Number(s.counts[pid].sold||0) + q;
+      if (s.counts[pid].sold < 0) s.counts[pid].sold = 0;
+    }
+    store.save();
+    updateInvStatus();
+  }
+
+  function updateInvStatus(){
+    const s = currentSession();
+    if (!els.invStatus) return;
+    if (!s){
+      els.invStatus.textContent = "📦 Sin inventario";
+      els.invStatus.style.borderColor = "rgba(255,176,32,.35)";
+      return;
+    }
+    els.invStatus.textContent = "📦 Jornada: " + s.dateKey;
+    els.invStatus.style.borderColor = "rgba(38,194,129,.35)";
+  }
+
+  function openInventorySetup(){
+    const today = isoLocalDate(new Date());
+    let s = sessionForDate(today) || currentSession();
+
+    const base = {};
+    const prev = lastClosedSession();
+    if (prev){
+      for (const [pid, c] of Object.entries(prev.counts||{})){
+        const end = Number(c.start||0) - Number(c.sold||0);
+        base[pid] = Math.max(0, end);
+      }
+    }
+
+    // If there is an existing open session, use its current starts as base
+    if (s){
+      ensureSessionCounts(s);
+      for (const [pid, c] of Object.entries(s.counts||{})){
+        base[pid] = Number(c.start||0);
+      }
+    }
+
+    const rows = activeProducts().slice().sort((a,b)=> (a.category||"").localeCompare(b.category||"", "es") || a.name.localeCompare(b.name,"es"))
+      .map(p => {
+        let v = ((store.data.settings?.invAutoCarry !== false) ? (base[p.id] ?? 0) : 0);
+      if (s){
+        ensureSessionCounts(s);
+        const c = s.counts[p.id];
+        if (c) v = Number(c.start||0);
+      }
+        return `
+          <div>
+            <label>${escapeHtml(p.name)} <span class="badge">${escapeHtml(p.category||"Otros")}</span></label>
+            <input inputmode="numeric" data-pid="${p.id}" class="invInput" value="${escapeAttr(v)}" placeholder="0" />
+          </div>
+        `;
+      }).join("");
+
+    modal.open("Inventario del día", `
+      <div class="hint">Cargá el <b>stock inicial</b> antes de vender. Se sugiere el sobrante del último día trabajado.</div>
+      <div class="row" style="margin-top:10px; justify-content:space-between; gap:10px; flex-wrap:wrap">
+        <label style="margin:0; display:flex; align-items:center; gap:8px">
+          <input type="checkbox" id="invAutoCarry" checked />
+          Cargar sobrante automáticamente
+        </label>
+        <div class="row" style="gap:8px">
+          <button class="btn small" id="invApplyCarry">Aplicar sobrante</button>
+          <button class="btn small danger" id="invReset">Reiniciar jornada</button>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div class="fields two" style="align-items:end">
+        <div>
+          <label>Fecha de jornada</label>
+          <input type="date" id="invDate" value="${escapeAttr(today)}" />
+        </div>
+        <div class="row" style="justify-content:flex-end">
+          <button class="btn small" id="invClose">Cerrar jornada</button>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div class="fields two">${rows}</div>
+      <div class="sep"></div>
+      <div class="row" style="justify-content:space-between">
+        <button class="btn ghost" id="invCancel">Cancelar</button>
+        <button class="btn primary" id="invSave">Iniciar / Guardar ✅</button>
+      </div>
+      <div class="hint" style="margin-top:10px">
+        Al cerrar la jornada, el sobrante queda listo para el próximo día que trabajes.
+      </div>
+    `);
+
+    
+    $("#invAutoCarry").checked = (store.data.settings?.invAutoCarry !== false);
+    $("#invAutoCarry").addEventListener("change", (e) => {
+      store.data.settings.invAutoCarry = !!e.target.checked;
+      store.save();
+    });
+
+    $("#invApplyCarry").addEventListener("click", () => {
+      const prev = lastClosedSession();
+      if (!prev) return toast("No hay jornada anterior cerrada");
+      const base = {};
+      for (const [pid, c] of Object.entries(prev.counts||{})){
+        const end = Number(c.start||0) - Number(c.sold||0);
+        base[pid] = Math.max(0, end);
+      }
+      $$(".invInput").forEach(inp => {
+        const pid = inp.dataset.pid;
+        inp.value = String(base[pid] ?? 0);
+      });
+      toast("Sobrante aplicado ✅");
+    });
+
+    $("#invReset").addEventListener("click", () => {
+      const ses = currentSession();
+      const dateKey = $("#invDate").value || isoLocalDate(new Date());
+      if (!ses) return toast("No hay jornada abierta");
+      if (!confirm("¿Seguro que querés reiniciar la jornada? (se pierden vendidos/reservas)")) return;
+      const typed = prompt('Escribí REINICIAR para confirmar');
+      if ((typed||"").trim().toUpperCase() !== "REINICIAR") return toast("Cancelado");
+      // reiniciar: dejar todo en 0 y resetear vendidos
+      ensureSessionCounts(ses);
+      for (const pid of Object.keys(ses.counts||{})){
+        ses.counts[pid].start = 0;
+        ses.counts[pid].sold = 0;
+      }
+      // también limpiar mesas pendientes (porque estaban reservando stock)
+      store.data.tables.orders = {};
+      store.save();
+      // UI: poner inputs en 0
+      $$(".invInput").forEach(inp => inp.value = "0");
+      updateInvStatus();
+      renderPendingTables();
+      renderTableChips();
+      renderCart();
+      toast("Jornada reiniciada ✅");
+    });
+
+    $("#invCancel").addEventListener("click", () => modal.close());
+    $("#invSave").addEventListener("click", () => {
+      const dateKey = $("#invDate").value || today;
+      // use or create open session for date
+      let ses = sessionForDate(dateKey);
+      if (!ses){
+        ses = { id: uid(), dateKey, openedAt: new Date().toISOString(), closedAt: null, counts: {} };
+        store.data.inventory.sessions.push(ses);
+      }
+      ensureSessionCounts(ses);
+      $$(".invInput").forEach(inp => {
+        const pid = inp.dataset.pid;
+        const val = numFromInput(inp.value);
+        ses.counts[pid] ||= { start: 0, sold: 0 };
+        ses.counts[pid].start = val;
+        if (ses.counts[pid].sold > ses.counts[pid].start) ses.counts[pid].sold = ses.counts[pid].start;
+      });
+      store.data.inventory.currentSessionId = ses.id;
+      store.save();
+      modal.close();
+      try{ cloudPushNow?.(); }catch(e){}
+      updateInvStatus();
+      renderProductGrid($(".chip.active")?.textContent?.replace("🔴 ","") || "Todos");
+      toast("Inventario guardado ✅");
+    });
+
+    $("#invClose").addEventListener("click", () => {
+      const ses = currentSession();
+      if (!ses) return toast("No hay jornada abierta");
+      if (!confirm("¿Cerrar la jornada actual?")) return;
+      ses.closedAt = new Date().toISOString();
+      store.data.inventory.currentSessionId = null;
+      store.save();
+      updateInvStatus();
+      toast("Jornada cerrada ✅");
+      modal.close();
+    });
+  }
+
+
+
+  function addToCart(productId){
+    const existing = state.cart.find(x => x.productId === productId);
+    if (existing) existing.qty += 1;
+    else state.cart.push({ productId, qty: 1 });
+    renderCart();
+  }
+
+  function clearCart(){
+    state.cart = [];
+    state.saleEditingId = null;
+    els.saleNotes.value = "";
+    els.salePay.dataset.manual = "";
+    ensureDefaults();
+    renderCart();
+    toast("Carrito vacío");
+  }
+
+  function renderCart(){
+    const items = cartItemsExpanded();
+    const { total, cost, profit } = saleTotals(items);
+    const itemsCount = items.reduce((s,x)=>s+x.qty,0);
+    let meta = `${itemsCount} ítems`;
+    if (state.selectedTable) {
+      const ord = getTableOrder(state.selectedTable);
+      if (ord && ord.status==="open" && !state.loadedTableId) meta += ` · ${tableLabel(state.selectedTable)} (pendiente existente)`;
+      else meta += ` · ${tableLabel(state.selectedTable)}`;
+      if (state.loadedTableId) meta += " · (abierta)";
+    }
+    els.cartMeta.textContent = meta;
+    els.cartTotal.textContent = fmtGs(total);
+    els.cartCost.textContent = fmtGs(cost);
+    els.cartProfit.textContent = fmtGs(profit);
+
+    // disponible hoy (ventas efectivo - gastos)
+    if (els.cashAvailableToday){
+      const dd = isoLocalDate(new Date());
+      const ex = expectedByDate(dd);
+      els.cashAvailableToday.textContent = fmtGs(ex.cashNet ?? (ex.cash - (ex.expenses||0)));
+    }
+
+    // update pending button label (edit vs new)
+    const pendingBtn = $("#btnSavePending");
+    if (pendingBtn){
+      pendingBtn.textContent = state.loadedTableId ? "Actualizar mesa ⏳" : "Dejar pendiente ⏳";
+    }
+
+    // highlight payment mismatch with suggested
+    const suggested = els.paySuggested.textContent;
+    const pay = els.salePay.value;
+    if (suggested && suggested !== "—" && pay !== suggested){
+      els.salePay.style.borderColor = "rgba(255,176,32,.6)";
+    } else {
+      els.salePay.style.borderColor = "var(--line)";
+    }
+
+    els.cartList.innerHTML = "";
+    if (!items.length){
+      els.cartList.innerHTML = `<div class="hint">Tocá productos para agregar al carrito.</div>`;
+      $("#btnSaveSale").disabled = true;
+      return;
+    }
+    $("#btnSaveSale").disabled = false;
+
+    for (const it of items){
+      const p = it.product;
+      const lineTotal = it.qty * Number(p.price||0);
+      const row = document.createElement("div");
+      row.className = "cartrow";
+      row.innerHTML = `
+        <div>
+          <div class="n">${escapeHtml(p.name)}</div>
+          <div class="m">${escapeHtml(p.category||"Otros")} · ${fmtGs(p.price)} · <span class="mono">${it.qty}</span> · <b>${fmtGs(lineTotal)}</b></div>
+        </div>
+        <div class="acts">
+          <button class="qtybtn" data-act="minus">−</button>
+          <div class="qty">${it.qty}</div>
+          <button class="qtybtn" data-act="plus">+</button>
+          <button class="qtybtn" data-act="del" title="Quitar">🗑️</button>
+        </div>
+      `;
+      const btns = row.querySelectorAll(".qtybtn");
+      btns.forEach(btn => btn.addEventListener("click", () => {
+        const act = btn.dataset.act;
+        const target = state.cart.find(x => x.productId === it.productId);
+        if (!target) return;
+        if (act === "plus") target.qty += 1;
+        if (act === "minus") target.qty = Math.max(0, target.qty - 1);
+        if (act === "del") target.qty = 0;
+        state.cart = state.cart.filter(x => x.qty > 0);
+        renderCart();
+      }));
+      els.cartList.appendChild(row);
+    }
+  }
+
+  
+  function savePending(){
+    const items = cartItemsExpanded();
+    if (!items.length){ toast("Carrito vacío"); return; }
+    if (!currentSession()){ toast("Primero cargá el inventario (📦)"); return; }
+
+    if (!state.selectedTable){
+      toast("Seleccioná una mesa para dejar pendiente");
+      return;
+    }
+
+    // if table already has an order, we overwrite it
+    const existing = getTableOrder(state.selectedTable);
+
+    // If we are editing the same table we loaded, don't ask again
+    const editingSame = !!(existing && existing.status==="open" && state.loadedTableId === state.selectedTable);
+
+    if (existing && existing.status==="open" && !editingSame){
+      const ok = confirm("Esa mesa ya tenía un pendiente. ¿Reemplazarlo? (se devuelve inventario del anterior)");
+      if (!ok) return;
+    }
+    if (existing && existing.status==="open"){
+      // return previously reserved items to inventory, then reserve the new ones
+      adjustInventoryForItems(existing.items||[], -1);
+    }
+
+    const dt = els.saleDT.value ? new Date(els.saleDT.value) : new Date();
+    const clientId = els.saleClient.value;
+    const client = getClient(clientId);
+    const pay = els.salePay.value;
+    const channel = els.saleChannel.value;
+    const notes = els.saleNotes.value || "";
+
+    const order = {
+      id: existing?.id || uid(),
+      tableId: state.selectedTable,
+      status: "open",
+      createdAt: existing?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      clientId,
+      clientName: client?.name || "—",
+      pay,
+      channel,
+      notes,
+      items: items.map(x => ({ productId: x.productId, qty: x.qty }))
+    };
+
+    // reserve inventory now (sale already produced)
+    adjustInventoryForItems(order.items, +1);
+
+    setTableOrder(state.selectedTable, order);
+    toast("Mesa pendiente ✅");
+    clearCart();
+    renderTableChips();
+    renderPendingTables();
+  }
+
+  function saveSale(){
+    const items = cartItemsExpanded();
+    if (!items.length){ toast("Carrito vacío"); return; }
+    if (!currentSession()){ toast("Primero cargá el inventario (📦)"); return; }
+
+    const dt = els.saleDT.value ? new Date(els.saleDT.value) : new Date();
+    const clientId = els.saleClient.value;
+    const client = getClient(clientId);
+    const pay = els.salePay.value;
+    const channel = els.saleChannel.value;
+    const notes = els.saleNotes.value || "";
+    const { total, cost, profit } = saleTotals(items);
+
+    // If we are paying a pending table, use its stored id and clear it (inventory was already reserved)
+    let fromTable = null;
+    if (state.loadedTableId){
+      const ord = getTableOrder(state.loadedTableId);
+      if (ord) fromTable = ord;
+    }
+
+    const sale = {
+      id: state.saleEditingId || (fromTable?.id) || uid(),
+      dt: new Date(dt.getTime()).toISOString(),
+      clientId,
+      clientName: client?.name || "—",
+      channel,
+      pay,
+      items: items.map(x => ({ productId: x.productId, qty: x.qty })),
+      notes,
+      total,
+      cost,
+      profit,
+      tableId: state.selectedTable || null,
+      updatedAt: new Date().toISOString()
+    };
+
+    if (state.saleEditingId){
+      const idx = store.data.sales.findIndex(s => s.id === state.saleEditingId);
+      if (idx !== -1) store.data.sales[idx] = sale;
+      // inventory adjustment for edits is complex; we leave as-is to avoid mismatches
+      toast("Venta actualizada ✅");
+    } else {
+      store.data.sales.push(sale);
+      // If this was NOT a pending table, discount inventory now
+      if (!fromTable){
+        adjustInventoryForItems(sale.items, +1);
+      }
+      toast("Venta guardada ✅");
+    }
+
+    // If paying a pending table, clear it
+    if (fromTable){
+      setTableOrder(fromTable.tableId, null);
+      state.loadedTableId = null;
+      renderTableChips();
+      renderPendingTables();
+    }
+
+    store.save();
+    clearCart();
+  }
+
+
+  // Buttons
+  $("#btnClearCart").addEventListener("click", clearCart);
+  $("#btnDiscardSale").addEventListener("click", clearCart);
+  $("#btnSaveSale").addEventListener("click", saveSale);
+  $("#btnSavePending").addEventListener("click", savePending);
+
+  // ---------- Historial ----------
+  function parseDateInput(v){ return v ? new Date(v + "T00:00:00") : null; }
+  function inRange(d, from, to){
+    const t = d.getTime();
+    if (from && t < from.getTime()) return false;
+    if (to && t > (to.getTime() + 86400000 - 1)) return false;
+      return true;
+  }
+
+  function saleLocalDate(sale){
+    const d = new Date(sale.dt);
+    return isoLocalDate(d);
+  }
+
+  function expenseLocalDate(e){
+    if(!e) return "";
+    const dt = e.at || e.createdAt || e.updatedAt;
+    try{ return isoLocalDate(new Date(dt)); }catch(_){ return String(dt||"").slice(0,10); }
+  }
+
+  function renderHistorial(){
+    // default range: today
+    if (!els.hFrom.value) els.hFrom.value = isoLocalDate(new Date());
+    if (!els.hTo.value) els.hTo.value = isoLocalDate(new Date());
+
+    const from = parseDateInput(els.hFrom.value);
+    const to = parseDateInput(els.hTo.value);
+    const q = (els.hSearch.value || "").trim().toLowerCase();
+
+    const sales = store.data.sales
+      .slice()
+      .sort((a,b)=> new Date(b.dt) - new Date(a.dt))
+      .filter(s => inRange(new Date(s.dt), from, to))
+      .filter(s => {
+        if (!q) return true;
+        const client = (s.clientName||"").toLowerCase();
+        const notes = (s.notes||"").toLowerCase();
+        const products = (s.items||[]).map(it => (getProduct(it.productId)?.name||"").toLowerCase()).join(" ");
+        return client.includes(q) || notes.includes(q) || products.includes(q) || (s.pay||"").toLowerCase().includes(q);
+      });
+
+    els.histMeta.textContent = `${sales.length} ventas`;
+    els.histList.innerHTML = "";
+    els.histEmpty.style.display = sales.length ? "none" : "block";
+
+    // KPIs
+    let total=0,cash=0,card=0,credit=0,cost=0,profit=0;
+    for (const s of sales){
+      total += Number(s.total||0);
+      cost += Number(s.cost||0);
+      profit += Number(s.profit||0);
+      if (s.pay === "Efectivo") cash += Number(s.total||0);
+      if (s.pay === "Tarjeta") card += Number(s.total||0);
+      if (s.pay === "Crédito") credit += Number(s.total||0);
+    }
+    els.kpiSales.textContent = fmtGs(total);
+    els.kpiCash.textContent = fmtGs(cash);
+    els.kpiCard.textContent = fmtGs(card);
+    els.kpiCredit.textContent = fmtGs(credit);
+    els.kpiCost.textContent = fmtGs(cost);
+    els.kpiProfit.textContent = fmtGs(profit);
+
+    for (const s of sales){
+      const d = new Date(s.dt);
+      const when = d.toLocaleString("es-PY", { dateStyle:"short", timeStyle:"short" });
+      const itemsTxt = (s.items||[]).map(it => {
+        const p = getProduct(it.productId);
+        return `${it.qty}× ${p ? p.name : "Producto"}`;
+      }).join(" · ");
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="left">
+          <div class="title">${escapeHtml(s.clientName || "—")} <span class="badge">${escapeHtml(s.pay||"")}</span></div>
+          <div class="desc">${escapeHtml(itemsTxt || "—")}</div>
+          <div class="tiny">${escapeHtml(when)} · ${escapeHtml(s.channel||"")}${s.notes ? " · " + escapeHtml(s.notes) : ""}</div>
+        </div>
+        <div class="right">
+          <div class="money">${fmtGs(s.total)}</div>
+          <button class="btn small" data-id="${s.id}">Editar</button>
+        </div>
+      `;
+      div.querySelector("button").addEventListener("click", () => openEditSale(s.id));
+      els.histList.appendChild(div);
+    }
+  }
+
+  els.hFrom.addEventListener("change", renderHistorial);
+  els.hTo.addEventListener("change", renderHistorial);
+  els.hSearch.addEventListener("input", () => {
+    clearTimeout(renderHistorial._t);
+    renderHistorial._t = setTimeout(renderHistorial, 120);
+  });
+
+  function openEditSale(saleId){
+    const s = store.data.sales.find(x => x.id === saleId);
+    if (!s) return toast("No se encontró la venta");
+    const items = (s.items||[]).map(it => {
+      const p = getProduct(it.productId);
+      const price = Number(p?.price||0);
+      return {
+        productId: it.productId,
+        name: p?.name || "Producto",
+        category: p?.category || "Otros",
+        qty: Number(it.qty||0),
+        unit: price,
+        line: Number(it.qty||0)*price
+      };
+    });
+
+    const lines = items.map((it, idx) => `
+      <div class="cartrow">
+        <div>
+          <div class="n">${escapeHtml(it.name)}</div>
+          <div class="m">${escapeHtml(it.category)} · ${fmtGs(it.unit)} · <b>${fmtGs(it.line)}</b></div>
+        </div>
+        <div class="acts">
+          <button class="qtybtn" data-i="${idx}" data-act="minus">−</button>
+          <div class="qty">${it.qty}</div>
+          <button class="qtybtn" data-i="${idx}" data-act="plus">+</button>
+          <button class="qtybtn" data-i="${idx}" data-act="del">🗑️</button>
+        </div>
+      </div>
+    `).join("");
+
+    modal.open("Editar venta", `
+      <div class="fields two">
+        <div>
+          <label>Cliente</label>
+          <select id="esClient">${clientOptionsHtml(s.clientId)}</select>
+        </div>
+        <div>
+          <label>Medio de pago</label>
+          <select id="esPay">
+            ${["Efectivo","Tarjeta","Crédito"].map(x => `<option ${x===s.pay?"selected":""} value="${x}">${x}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+      <div class="fields two" style="margin-top:10px">
+        <div>
+          <label>Canal</label>
+          <select id="esChannel">
+            ${["Local","WhatsApp","PedidosYa","Otro"].map(x => `<option ${x===s.channel?"selected":""} value="${x}">${x}</option>`).join("")}
+          </select>
+        </div>
+        <div>
+          <label>Fecha / hora</label>
+          <input id="esDT" type="datetime-local" value="${escapeAttr(isoLocalDT(new Date(s.dt)))}" />
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <label>Items</label>
+        <div class="cart" id="esItems">${lines || `<div class="hint">Sin ítems</div>`}</div>
+      </div>
+      <div style="margin-top:10px">
+        <label>Observaciones</label>
+        <input id="esNotes" value="${escapeAttr(s.notes||"")}" placeholder="..." />
+      </div>
+      <div class="sep"></div>
+      <div class="row" style="justify-content:space-between">
+        <button type="button" class="btn danger" id="esDelete">Eliminar</button>
+        <button type="button" class="btn primary" id="esSave">Guardar cambios ✅</button>
+      </div>
+      <div class="hint" style="margin-top:10px">Tip: si cambiaste precios de productos, el total se recalcula con el precio actual.</div>
+    `);
+
+    // mutable items array
+    let mItems = items.map(x => ({ productId:x.productId, qty:x.qty }));
+
+    const rerenderItems = () => {
+      const ex = mItems.map(it => {
+        const p = getProduct(it.productId);
+        const price = Number(p?.price||0);
+        return {
+          productId: it.productId,
+          name: p?.name || "Producto",
+          category: p?.category || "Otros",
+          qty: Number(it.qty||0),
+          unit: price,
+          line: Number(it.qty||0)*price
+        };
+      });
+      $("#esItems").innerHTML = ex.map((it, idx) => `
+        <div class="cartrow">
+          <div>
+            <div class="n">${escapeHtml(it.name)}</div>
+            <div class="m">${escapeHtml(it.category)} · ${fmtGs(it.unit)} · <b>${fmtGs(it.line)}</b></div>
+          </div>
+          <div class="acts">
+            <button class="qtybtn" data-i="${idx}" data-act="minus">−</button>
+            <div class="qty">${it.qty}</div>
+            <button class="qtybtn" data-i="${idx}" data-act="plus">+</button>
+            <button class="qtybtn" data-i="${idx}" data-act="del">🗑️</button>
+          </div>
+        </div>
+      `).join("") || `<div class="hint">Sin ítems</div>`;
+      $("#esItems").querySelectorAll(".qtybtn").forEach(b => b.addEventListener("click", () => {
+        const idx = Number(b.dataset.i);
+        const act = b.dataset.act;
+        const t = mItems[idx];
+        if (!t) return;
+        if (act === "plus") t.qty += 1;
+        if (act === "minus") t.qty = Math.max(0, t.qty-1);
+        if (act === "del") t.qty = 0;
+        mItems = mItems.filter(x => x.qty > 0);
+        rerenderItems();
+      }));
+    };
+    $("#esItems").querySelectorAll(".qtybtn").forEach(b => b.addEventListener("click", () => {
+      const idx = Number(b.dataset.i);
+      const act = b.dataset.act;
+      const t = mItems[idx];
+      if (!t) return;
+      if (act === "plus") t.qty += 1;
+      if (act === "minus") t.qty = Math.max(0, t.qty-1);
+      if (act === "del") t.qty = 0;
+      mItems = mItems.filter(x => x.qty > 0);
+      rerenderItems();
+    }));
+
+    $("#esDelete").addEventListener("click", (ev) => { ev.preventDefault();
+      if (!confirm("¿Eliminar esta venta?")) return;
+      // Devolver stock al inventario de la jornada
+      try { adjustInventoryForItems((s.items||[]), -1); } catch(e) {}
+      window.markDeleted("sales", saleId);
+      store.data.sales = store.data.sales.filter(x => x.id !== saleId);
+      store.save();
+      modal.close();
+      try{ cloudPushNow?.(); }catch(e){}
+      toast("Venta eliminada");
+      renderHistorial();
+      renderCierre();
+      try { renderProductos(); } catch(e) {}
+      try { renderVentaGrid(); } catch(e) {}
+      try { renderPendingTables(); renderTableChips(); } catch(e) {}
+    });
+
+    $("#esSave").addEventListener("click", (ev) => { ev.preventDefault();
+      const clientId = $("#esClient").value;
+      const client = getClient(clientId);
+      const pay = $("#esPay").value;
+      const channel = $("#esChannel").value;
+      const dt = $("#esDT").value ? new Date($("#esDT").value) : new Date(s.dt);
+      const notes = $("#esNotes").value || "";
+      const expanded = mItems.map(x => ({...x}));
+      const { total, cost, profit } = saleTotals(expanded);
+
+      const updated = {
+        ...s,
+        clientId,
+        clientName: client?.name || "—",
+        pay,
+        channel,
+        dt: new Date(dt.getTime()).toISOString(),
+        items: expanded,
+        notes,
+        total,
+        cost,
+        profit,
+        updatedAt: new Date().toISOString()
+      };
+
+      const idx = store.data.sales.findIndex(x => x.id === saleId);
+      if (idx !== -1) store.data.sales[idx] = updated;
+      store.save();
+      modal.close();
+      try{ cloudPushNow?.(); }catch(e){}
+      toast("Venta actualizada ✅");
+      renderHistorial();
+      renderCierre();
+      try { renderProductos(); } catch(e) {}
+      try { renderVentaGrid(); } catch(e) {}
+      try { renderPendingTables(); renderTableChips(); } catch(e) {}
+    });
+  }
+
+  // ---------- Cierre de caja ----------
+  function expectedByDate(yyyy_mm_dd){
+    const daySales = store.data.sales.filter(s => saleLocalDate(s) === yyyy_mm_dd);
+    const dayExpenses = (store.data.expenses||[]).filter(e => expenseLocalDate(e) === yyyy_mm_dd);
+    let cash=0, card=0, credit=0, creditPy=0, creditOther=0, total=0;
+    for (const s of daySales){
+      const v = Number(s.total||0);
+      total += v;
+      if (s.pay === "Efectivo") cash += v;
+      if (s.pay === "Tarjeta") card += v;
+      if (s.pay === "Crédito") {
+        credit += v;
+        const cn = String(s.clientName||"").toLowerCase();
+        const ch = String(s.channel||"").toLowerCase();
+        const isPy = cn.includes("pedidos") || ch.includes("pedidos");
+        if (isPy) creditPy += v;
+        else creditOther += v;
+      }
+    }
+    const expenses = dayExpenses.reduce((a,e)=>a+Number(e.amount||0),0);
+    const cashNet = cash - expenses;
+    return { cash, card, credit, creditPy, creditOther, total, expenses, cashNet, count: daySales.length };
+  }
+
+  function addExpenseForDate(yyyy_mm_dd, amount, note){
+    store.data.expenses ||= [];
+    const e = { id: uid(), date: yyyy_mm_dd, amount: Number(amount||0), note: (note||"").trim(), at: new Date().toISOString(), updatedAt: Date.now() };
+    store.data.expenses.push(e);
+    store.save();
+    return e;
+  }
+  function deleteExpense(id){
+    store.data.expenses ||= [];
+    store.data.expenses = store.data.expenses.filter(e=>e.id!==id);
+    try{ window.markDeleted('expenses', String(id)); }catch(e){}
+    store.save();
+  }
+  function listExpensesByDate(yyyy_mm_dd){
+    return (store.data.expenses||[]).filter(e => expenseLocalDate(e)===yyyy_mm_dd || e.date===yyyy_mm_dd);
+  }
+  function expensesTotalByDate(yyyy_mm_dd){
+    return listExpensesByDate(yyyy_mm_dd).reduce((a,e)=>a+Number(e.amount||0),0);
+  }
+
+  function numFromInput(v){
+    // accept "12.000" "12000" "12,000"
+    if (v == null) return 0;
+    const s = String(v).replace(/[^\d]/g, "");
+    return Number(s || 0);
+  }
+
+
+  // ---------- Contador de efectivo (denominaciones) ----------
+  const DENOMS = [100000, 50000, 20000, 10000, 5000, 2000, 1000, 500, 100, 50];
+  function renderDenoms(){
+    const grid = $("#denomGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+    for (const d of DENOMS){
+      const wrap = document.createElement("div");
+      wrap.innerHTML = `
+        <label>${fmtGs(d).replace("Gs ","Gs ")} (cant.)</label>
+        <input inputmode="numeric" class="denInp" data-den="${d}" placeholder="0" />
+      `;
+      grid.appendChild(wrap);
+    }
+    grid.querySelectorAll(".denInp").forEach(inp => inp.addEventListener("input", updateDenomsTotal));
+    $("#btnClearDenoms")?.addEventListener("click", () => {
+      grid.querySelectorAll(".denInp").forEach(i => i.value = "");
+      updateDenomsTotal();
+    });
+    updateDenomsTotal();
+  }
+
+  function updateDenomsTotal(){
+    const grid = $("#denomGrid");
+    if (!grid) return;
+    let total = 0;
+    grid.querySelectorAll(".denInp").forEach(inp => {
+      const den = Number(inp.dataset.den||0);
+      const qty = numFromInput(inp.value);
+      total += den * qty;
+    });
+    $("#denomTotal").textContent = fmtGs(total);
+    // sync to efectivo contado
+    els.cCash.value = String(total);
+    renderCierre();
+  }
+
+  function renderCierre(){
+    if (!els.cDate.value) els.cDate.value = isoLocalDate(new Date());
+    const d = els.cDate.value;
+    const exp = expectedByDate(d);
+    // gastos del día
+    const expList = listExpensesByDate(d);
+    const expTot = exp.expenses ?? expensesTotalByDate(d);
+    if (els.cExpTotal) els.cExpTotal.textContent = fmtGs(expTot);
+    if (els.cCashNetExp) els.cCashNetExp.textContent = fmtGs(exp.cashNet ?? (exp.cash - expTot));
+    if (els.cExpList){
+      els.cExpList.innerHTML = "";
+      for (const e of expList){
+        const row = document.createElement("div");
+        row.className = "row between";
+        row.style.padding = "6px 0";
+        row.innerHTML = `<div><span class="mono">${fmtGs(e.amount||0)}</span>${e.note?` · <span class="muted">${escapeHtml(e.note)}</span>`:""}</div>
+                         <button class="btn small danger" data-id="${e.id}">🗑</button>`;
+        row.querySelector("button").addEventListener("click", ()=>{
+          if(!confirm("¿Eliminar gasto?")) return;
+          deleteExpense(e.id);
+          renderCierre();
+          renderProductos();
+        });
+        els.cExpList.appendChild(row);
+      }
+    }
+    if (els.cExpAdd){
+      els.cExpAdd.onclick = ()=>{
+        const amt = numFromInput(els.cExpAmt.value);
+        if (!amt){ toast("Monto inválido"); return; }
+        addExpenseForDate(d, amt, els.cExpNote.value);
+        els.cExpAmt.value = "";
+        els.cExpNote.value = "";
+        renderCierre();
+        renderProductos();
+      };
+    }
+
+    els.cCashExp.textContent = fmtGs(exp.cash);
+    els.cCardExp.textContent = fmtGs(exp.card);
+    els.cCreditExp.textContent = fmtGs(exp.credit);
+    if (els.cCreditPyExp) els.cCreditPyExp.textContent = fmtGs(exp.creditPy||0);
+    if (els.cCreditOtherExp) els.cCreditOtherExp.textContent = fmtGs(exp.creditOther||0);
+
+    const cntCash = numFromInput(els.cCash.value);
+    const cntCard = numFromInput(els.cCard.value);
+    const cntCredit = numFromInput(els.cCredit.value);
+    const cntTot = cntCash + cntCard + cntCredit;
+
+    els.cExpTot.textContent = fmtGs(exp.total);
+    els.cCntTot.textContent = fmtGs(cntTot);
+
+    const diff = cntTot - exp.total;
+    els.cDiff.textContent = fmtGs(diff);
+    els.cDiffBox.classList.remove("good","warn","bad");
+    if (diff === 0) els.cDiffBox.classList.add("good");
+    else if (Math.abs(diff) <= 5000) els.cDiffBox.classList.add("warn");
+    else els.cDiffBox.classList.add("bad");
+
+    // List closes
+    const closes = store.data.closes.slice().sort((a,b)=> b.date.localeCompare(a.date));
+    els.closeList.innerHTML = "";
+    els.closeEmpty.style.display = closes.length ? "none" : "block";
+
+    for (const c of closes){
+      const cls = (c.diffTotal === 0) ? "badge" : `badge`;
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="left">
+          <div class="title">${escapeHtml(c.date)} <span class="${cls}">descuadre: ${fmtGs(c.diffTotal)}</span></div>
+          <div class="desc">Esperado ${fmtGs(c.expected.total)} · Contado ${fmtGs(c.counted.total)}</div>
+          <div class="tiny">${escapeHtml(c.note||"")}</div>
+        </div>
+        <div class="right">
+          <button class="btn small" data-id="${c.id}">Ver</button>
+        </div>
+      `;
+      div.querySelector("button").addEventListener("click", () => openCloseDetail(c.id));
+      els.closeList.appendChild(div);
+    }
+  
+    updateFloatCash();
+}
+
+  ["input","change"].forEach(ev => {
+    els.cDate.addEventListener(ev, renderCierre);
+    els.cCash.addEventListener(ev, renderCierre);
+    els.cCard.addEventListener(ev, renderCierre);
+    els.cCredit.addEventListener(ev, renderCierre);
+  });
+
+  $("#btnSaveClose").addEventListener("click", () => {
+    const date = els.cDate.value;
+    const exp = expectedByDate(date);
+    const counted = {
+      cash: numFromInput(els.cCash.value),
+      card: numFromInput(els.cCard.value),
+      credit: numFromInput(els.cCredit.value),
+    };
+    counted.total = counted.cash + counted.card + counted.credit;
+
+    const close = {
+      id: uid(),
+      date,
+      note: (els.cNote.value || "").trim(),
+      expected: exp,
+      counted,
+      diff: {
+        cash: counted.cash - exp.cash,
+        card: counted.card - exp.card,
+        credit: counted.credit - exp.credit,
+        total: counted.total - exp.total
+      },
+      diffTotal: counted.total - exp.total,
+      savedAt: new Date().toISOString()
+    };
+    // upsert by date (only one close per date)
+    const idx = store.data.closes.findIndex(x => x.date === date);
+    if (idx !== -1) store.data.closes[idx] = { ...close, id: store.data.closes[idx].id };
+    else store.data.closes.push(close);
+
+    store.save();
+    toast("Cierre guardado ✅");
+    renderCierre();
+  });
+
+  function openCloseDetail(id){
+    const c = store.data.closes.find(x => x.id === id);
+    if (!c) return toast("No se encontró el cierre");
+    modal.open("Detalle de cierre", `
+      <div class="kpi">
+        <div class="box">
+          <div class="lbl">Fecha</div>
+          <div class="val">${escapeHtml(c.date)}</div>
+        </div>
+        <div class="box">
+          <div class="lbl">Esperado</div>
+          <div class="val">${fmtGs(c.expected.total)}</div>
+        </div>
+        <div class="box ${c.diffTotal===0 ? "good":"bad"}">
+          <div class="lbl">Descuadre</div>
+          <div class="val">${fmtGs(c.diffTotal)}</div>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div class="fields three">
+        <div>
+          <label>Efectivo</label>
+          <div class="badge">Esperado: ${fmtGs(c.expected.cash)}</div>
+          <div class="badge">Contado: ${fmtGs(c.counted.cash)}</div>
+          <div class="badge">Diff: ${fmtGs(c.diff.cash)}</div>
+        </div>
+        <div>
+          <label>Tarjeta</label>
+          <div class="badge">Esperado: ${fmtGs(c.expected.card)}</div>
+          <div class="badge">Contado: ${fmtGs(c.counted.card)}</div>
+          <div class="badge">Diff: ${fmtGs(c.diff.card)}</div>
+        </div>
+        <div>
+          <label>Crédito</label>
+          <div class="badge">Esperado: ${fmtGs(c.expected.credit)}</div>
+          <div class="badge">Contado: ${fmtGs(c.counted.credit)}</div>
+          <div class="badge">Diff: ${fmtGs(c.diff.credit)}</div>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <label>Nota</label>
+        <div class="hint">${escapeHtml(c.note || "—")}</div>
+      </div>
+      <div class="sep"></div>
+      <div class="row" style="justify-content:space-between">
+        <button type="button" class="btn danger" id="delClose">Eliminar</button>
+        <button class="btn" id="closeModal">Cerrar</button>
+      </div>
+    `);
+    $("#closeModal").addEventListener("click", () => modal.close());
+    $("#delClose").addEventListener("click", (ev) => { ev.preventDefault();
+      if (!confirm("¿Eliminar este cierre?")) return;
+      window.markDeleted("closes", id);
+      store.data.closes = store.data.closes.filter(x => x.id !== id);
+      store.save();
+      modal.close();
+      try{ cloudPushNow?.(); }catch(e){}
+      toast("Cierre eliminado");
+      renderCierre();
+      try { renderProductos(); } catch(e) {}
+      try { renderVentaGrid(); } catch(e) {}
+      try { renderPendingTables(); renderTableChips(); } catch(e) {}
+    });
+  }
+
+  // ---------- Clientes ----------
+  function clientOptionsHtml(selectedId){
+    const clients = activeClients().slice().sort((a,b)=> a.name.localeCompare(b.name, "es"));
+    return clients.map(c => `<option value="${c.id}" ${c.id===selectedId?"selected":""}>${escapeHtml(c.name)}</option>`).join("");
+  }
+
+  function renderClientSelect(){
+    const clients = activeClients().slice().sort((a,b)=> a.name.localeCompare(b.name, "es"));
+    els.saleClient.innerHTML = clients.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join("");
+  }
+
+  function renderClientes(){
+    const q = (els.cliSearch.value||"").trim().toLowerCase();
+    const f = els.cliFilter.value;
+    const list = store.data.clients
+      .slice()
+      .sort((a,b)=> a.name.localeCompare(b.name, "es"))
+      .filter(c => {
+        if (f === "active" && c.active === false) return false;
+        if (f === "inactive" && c.active !== false) return false;
+        if (!q) return true;
+        return (c.name||"").toLowerCase().includes(q) || (c.type||"").toLowerCase().includes(q);
+      });
+
+    els.cliList.innerHTML = "";
+    els.cliEmpty.style.display = list.length ? "none" : "block";
+
+    for (const c of list){
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="left">
+          <div class="title">${escapeHtml(c.name)} ${c.active===false ? '<span class="badge">Inactivo</span>' : ''}</div>
+          <div class="desc">${escapeHtml(c.type||"")} · Default: <b>${escapeHtml(c.defaultPay||"")}</b></div>
+          <div class="tiny">${escapeHtml(c.notes||"")}</div>
+        </div>
+        <div class="right">
+          <button class="btn small" data-id="${c.id}">Editar</button>
+        </div>
+      `;
+      div.querySelector("button").addEventListener("click", () => openClientForm(c.id));
+      els.cliList.appendChild(div);
+    }
+  }
+
+  els.cliSearch.addEventListener("input", () => { clearTimeout(renderClientes._t); renderClientes._t=setTimeout(renderClientes,120); });
+  els.cliFilter.addEventListener("change", renderClientes);
+  $("#btnNewClient").addEventListener("click", () => openClientForm(null));
+
+  function openClientForm(id){
+    const c = id ? store.data.clients.find(x=>x.id===id) : null;
+    modal.open(id ? "Editar cliente" : "Nuevo cliente", `
+      <div class="fields two">
+        <div>
+          <label>Nombre</label>
+          <input id="cName" value="${escapeAttr(c?.name||"")}" placeholder="Ej: Juan / Empresa X" />
+        </div>
+        <div>
+          <label>Tipo</label>
+          <select id="cType">
+            ${["Local","Delivery","Empresa","Otro"].map(x => `<option ${x===c?.type?"selected":""} value="${x}">${x}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+      <div class="fields two" style="margin-top:10px">
+        <div>
+          <label>Medio de pago por defecto</label>
+          <select id="cPay">
+            ${["Efectivo","Tarjeta","Crédito"].map(x => `<option ${(x===(c?.defaultPay||"Efectivo"))?"selected":""} value="${x}">${x}</option>`).join("")}
+          </select>
+          <div class="hint" style="margin-top:6px"><b>PedidosYa</b> debería ser <b>Crédito</b>.</div>
+        </div>
+        <div>
+          <label>Activo</label>
+          <select id="cActive">
+            <option value="true" ${(c?.active!==false)?"selected":""}>Sí</option>
+            <option value="false" ${(c?.active===false)?"selected":""}>No</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <label>Notas</label>
+        <textarea id="cNotes" placeholder="...">${escapeHtml(c?.notes||"")}</textarea>
+      </div>
+      <div class="sep"></div>
+      <div class="row" style="justify-content:space-between">
+        ${id ? `<button class="btn danger" id="cDel" type="button">Eliminar</button>` : `<span></span>`}
+        <button class="btn primary" id="cSave">Guardar ✅</button>
+      </div>
+    `);
+
+    if (id){
+      $("#cDel").addEventListener("click", (ev) => { ev.preventDefault();
+        if (!confirm("¿Eliminar este cliente?")) return;
+        // prevent deletion if used in sales: we inactivate instead
+        const used = store.data.sales.some(s => s.clientId === id);
+        if (used){
+          const idx = store.data.clients.findIndex(x=>x.id===id);
+          store.data.clients[idx].active = false;
+          store.save();
+          modal.close();
+      try{ cloudPushNow?.(); }catch(e){}
+          toast("Cliente inactivado (ya tiene ventas)");
+          renderClientes();
+          renderClientSelect();
+          updateSuggestedPay();
+          return;
+        }
+        store.data.clients = store.data.clients.filter(x=>x.id!==id);
+        try{ window.markDeleted('clients', String(id)); }catch(e){}
+        store.save();
+        modal.close();
+      try{ cloudPushNow?.(); }catch(e){}
+        toast("Cliente eliminado");
+        renderClientes();
+        renderClientSelect();
+        updateSuggestedPay();
+      });
+    }
+
+    $("#cSave").addEventListener("click", () => {
+      const name = ($("#cName").value||"").trim();
+      if (!name){ toast("Falta el nombre"); return; }
+      const type = $("#cType").value;
+      const defaultPay = $("#cPay").value;
+      const active = $("#cActive").value === "true";
+      const notes = ($("#cNotes").value||"").trim();
+
+      // Special rule: PedidosYa always credit unless user changes it (still allow)
+      const obj = {
+        id: c?.id || uid(),
+        name,
+        type,
+        defaultPay,
+        active,
+        notes
+      };
+      if (c){
+        const idx = store.data.clients.findIndex(x=>x.id===c.id);
+        store.data.clients[idx] = obj;
+      } else {
+        store.data.clients.push(obj);
+      }
+      store.save();
+      modal.close();
+      try{ cloudPushNow?.(); }catch(e){}
+      toast("Cliente guardado ✅");
+      renderClientes();
+      renderClientSelect();
+      // keep selection coherent
+      els.saleClient.value = obj.id;
+      updateSuggestedPay();
+    });
+  }
+
+  // ---------- Productos ----------
+  function renderProductos(){
+    const q = (els.prodSearch.value||"").trim().toLowerCase();
+    const f = els.prodFilter.value;
+    const list = store.data.products
+      .slice()
+      .sort((a,b)=> {
+        const ca = (a.category||"Otros"), cb = (b.category||"Otros");
+        if (ca !== cb) return ca.localeCompare(cb,"es");
+        return a.name.localeCompare(b.name,"es");
+      })
+      .filter(p => {
+        if (f === "active" && p.active === false) return false;
+        if (f === "inactive" && p.active !== false) return false;
+        if (!q) return true;
+        return (p.name||"").toLowerCase().includes(q) || (p.category||"").toLowerCase().includes(q);
+      });
+
+    els.prodList.innerHTML = "";
+    els.prodEmpty.style.display = list.length ? "none" : "block";
+
+    for (const p of list){
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="left">
+          <div class="title">${escapeHtml(p.name)} ${p.active===false ? '<span class="badge">Inactivo</span>' : ''}</div>
+          <div class="desc">${escapeHtml(p.category||"Otros")} · Precio: <b>${fmtGs(p.price)}</b> · Costo: <b>${fmtGs(p.cost)}</b></div>
+          ${currentSession() ? `<div class="meta">Stock disponible: <b>${remainingOf(p.id)}</b></div>` : ``}
+        </div>
+        <div class="right">
+          <button class="btn small" data-id="${p.id}">Editar</button>
+        </div>
+      `;
+      div.querySelector("button").addEventListener("click", () => openProductForm(p.id));
+      els.prodList.appendChild(div);
+    }
+  }
+
+  els.prodSearch.addEventListener("input", () => { clearTimeout(renderProductos._t); renderProductos._t=setTimeout(renderProductos,120); });
+  els.prodFilter.addEventListener("change", renderProductos);
+  $("#btnNewProd").addEventListener("click", () => openProductForm(null));
+  $("#btnNewProd2").addEventListener("click", () => openProductForm(null));
+  $("#btnImportCosts").addEventListener("click", () => openImportCosts());
+
+  function normalizeName(s){
+    return String(s || "").toLowerCase()
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  }
+
+  function openImportCosts(){
+    const example = `ASADITO CARNE;3000;5000
+COCA 500ml;6000;8000
+HIELO 1 KILO;700;1000`;
+    modal.open("Importar costos / precios", `
+      <div class="hint">Pegá líneas con formato: <b>Nombre;Costo;Precio</b> (o separado por coma o tab).<br/>
+      Si ponés solo <b>Nombre;Costo</b>, solo actualiza el costo. Coincide por nombre (sin tildes / mayúsculas).</div>
+      <textarea id="impCosts" style="width:100%; min-height:180px; margin-top:10px" placeholder="${example}"></textarea>
+      <div class="row" style="justify-content:flex-end; margin-top:10px; gap:8px">
+        <button class="btn" id="impCancel">Cancelar</button>
+        <button class="btn primary" id="impApply">Aplicar</button>
+      </div>
+    `);
+    $("#impCancel").addEventListener("click", () => modal.close());
+    $("#impApply").addEventListener("click", () => {
+      const raw = $("#impCosts").value || "";
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      if (!lines.length){ toast("Pegá al menos 1 línea"); return; }
+      const data = store.data;
+      const byName = new Map(data.products.map(p => [normalizeName(p.name), p]));
+      let updated = 0, notFound = 0, parsed = 0;
+      for (const line of lines){
+        const parts = line.split(/	|;|,/).map(x => x.trim()).filter(Boolean);
+        if (parts.length < 2) continue;
+        const name = parts[0];
+        const cost = Number((parts[1]||"0").replace(/[^0-9]/g, "")) || 0;
+        const price = (parts.length >= 3) ? (Number((parts[2]||"0").replace(/[^0-9]/g, "")) || 0) : null;
+        parsed++;
+        const key = normalizeName(name);
+        const prod = byName.get(key);
+        if (!prod){ notFound++; continue; }
+        prod.cost = cost;
+        if (price != null && price > 0) prod.price = price;
+        updated++;
+      }
+      store.save();
+      renderProductos();
+      renderVentas();
+      modal.close();
+      toast(`Listo: ${updated} actualizados${notFound ? ` · ${notFound} no encontrados` : ""}`);
+    });
+  }
+
+
+  function openProductForm(id){
+    const p = id ? store.data.products.find(x=>x.id===id) : null;
+    modal.open(id ? "Editar producto" : "Nuevo producto", `
+      <div class="fields two">
+        <div>
+          <label>Nombre</label>
+          <input id="pName" value="${escapeAttr(p?.name||"")}" placeholder="Ej: Asadito de carne" />
+        </div>
+        <div>
+          <label>Categoría</label>
+          <input id="pCat" value="${escapeAttr(p?.category||"Otros")}" placeholder="Carne / Cerdo / Bebidas..." />
+        </div>
+      </div>
+      <div class="fields two" style="margin-top:10px">
+        <div>
+          <label>Precio (Gs)</label>
+          <input id="pPrice" inputmode="numeric" value="${p ? String(p.price||0) : ""}" placeholder="0" />
+        </div>
+        <div>
+          <label>Costo (Gs)</label>
+          <input id="pCost" inputmode="numeric" value="${p ? String(p.cost||0) : ""}" placeholder="0" />
+        </div>
+      </div>
+      <div class="fields two" style="margin-top:10px">
+        <div>
+          <label>Activo</label>
+          <select id="pActive">
+            <option value="true" ${(p?.active!==false)?"selected":""}>Sí</option>
+            <option value="false" ${(p?.active===false)?"selected":""}>No</option>
+          </select>
+        </div>
+        <div>
+          <label>Vista rápida</label>
+          <div class="badge">Se muestra en “Ventas”</div>
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div class="row" style="justify-content:space-between">
+        ${id ? `<button class="btn danger" id="pDel" type="button">Eliminar</button>` : `<span></span>`}
+        <button class="btn primary" id="pSave">Guardar ✅</button>
+      </div>
+    `);
+
+    if (id){
+      $("#pDel").addEventListener("click", (ev) => { ev.preventDefault();
+        if (!confirm("¿Eliminar este producto?")) return;
+        const used = store.data.sales.some(s => (s.items||[]).some(it => it.productId === id));
+        if (used){
+          const idx = store.data.products.findIndex(x=>x.id===id);
+          store.data.products[idx].active = false;
+          store.save();
+          modal.close();
+      try{ cloudPushNow?.(); }catch(e){}
+          toast("Producto inactivado (ya tiene ventas)");
+          refreshAllCatalogViews();
+          return;
+        }
+        store.data.products = store.data.products.filter(x=>x.id!==id);
+        try{ window.markDeleted('products', String(id)); }catch(e){}
+        store.save();
+        modal.close();
+      try{ cloudPushNow?.(); }catch(e){}
+        toast("Producto eliminado");
+        refreshAllCatalogViews();
+      });
+    }
+
+    $("#pSave").addEventListener("click", () => {
+      const name = ($("#pName").value||"").trim();
+      if (!name){ toast("Falta el nombre"); return; }
+      const category = ($("#pCat").value||"Otros").trim() || "Otros";
+      const price = numFromInput($("#pPrice").value);
+      const cost = numFromInput($("#pCost").value);
+      const active = $("#pActive").value === "true";
+
+      const obj = { id: p?.id || uid(), name, category, price, cost, active };
+      if (p){
+        const idx = store.data.products.findIndex(x=>x.id===p.id);
+        store.data.products[idx] = obj;
+      } else {
+        store.data.products.push(obj);
+      }
+      store.save();
+      modal.close();
+      try{ cloudPushNow?.(); }catch(e){}
+      toast("Producto guardado ✅");
+      refreshAllCatalogViews();
+    });
+  }
+
+  function refreshAllCatalogViews(){
+    renderCategories($(".chip.active")?.textContent || "Todos");
+    renderProductGrid($(".chip.active")?.textContent || "Todos");
+    renderCart();
+    renderProductos();
+    // historial totals might change if prices/costs changed => update computed with saved totals, not dynamic
+    // but editing sales recalculates. keep simple.
+  }
+
+  // ---------- CSV Export ----------
+  $("#btnExportCSV").addEventListener("click", () => {
+    const from = parseDateInput(els.hFrom.value);
+    const to = parseDateInput(els.hTo.value);
+    const q = (els.hSearch.value || "").trim().toLowerCase();
+
+    const sales = store.data.sales
+      .slice()
+      .sort((a,b)=> new Date(a.dt) - new Date(b.dt))
+      .filter(s => inRange(new Date(s.dt), from, to))
+      .filter(s => {
+        if (!q) return true;
+        const client = (s.clientName||"").toLowerCase();
+        const notes = (s.notes||"").toLowerCase();
+        const products = (s.items||[]).map(it => (getProduct(it.productId)?.name||"").toLowerCase()).join(" ");
+        return client.includes(q) || notes.includes(q) || products.includes(q) || (s.pay||"").toLowerCase().includes(q);
+      });
+
+    const rows = [];
+    rows.push(["FechaHora","Cliente","Canal","MedioPago","Items","Total","Costo","Ganancia","Notas"].join(","));
+    for (const s of sales){
+      const when = new Date(s.dt).toLocaleString("es-PY");
+      const itemsTxt = (s.items||[]).map(it => {
+        const p = getProduct(it.productId);
+        return `${it.qty}x ${(p ? p.name : "Producto")}`;
+      }).join(" | ");
+      rows.push([
+        csvCell(when),
+        csvCell(s.clientName||""),
+        csvCell(s.channel||""),
+        csvCell(s.pay||""),
+        csvCell(itemsTxt),
+        Number(s.total||0),
+        Number(s.cost||0),
+        Number(s.profit||0),
+        csvCell(s.notes||"")
+      ].join(","));
+    }
+    const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8" });
+    downloadBlob(blob, `ventas_${els.hFrom.value || "desde"}_${els.hTo.value || "hasta"}.csv`);
+    toast("CSV generado 📄");
+  });
+
+  function csvCell(s){
+    const v = String(s ?? "");
+    // escape quotes
+    return `"${v.replace(/"/g,'""')}"`;
+  }
+
+  
+  // ---------- Sync (multi-dispositivo) ----------
+  function openSyncModal(){
+    ensureMeta();
+    try{ modal.el.dataset.mode="sync"; _syncUiActive=true; }catch(e){}
+    const s = store.data?.settings || {};
+    const enabled = !!s.cloudEnabled;
+    const binId = s.cloudBinId || "";
+    const keyType = (s.cloudKeyType || (s.cloudApiKey ? "access" : (s.cloudMasterKey ? "master" : "access")));
+    const apiKey = (s.cloudApiKey || s.cloudMasterKey || "");
+    const pullEvery = Number(s.cloudPullEverySec || 10);
+
+    modal.open("Sync (multi-dispositivo)", `
+      <div class="grid2">
+        <div>
+          <label style="display:flex;align-items:center;gap:10px">
+            <input type="checkbox" id="syncEnabled" ${enabled ? "checked":""}/>
+            <span>Habilitar Sync (JSONBin)</span>
+          </label>
+          <div class="hint">Usá el mismo BIN ID + Master Key en todos los dispositivos.</div>
+        </div>
+        <div>
+          <label>Estado</label>
+          <div class="badge" id="syncStatusLine">${escapeHtml(syncStatusText())}</div>
+        </div>
+
+        <div>
+          <label>BIN ID</label>
+          <input id="syncBinId" placeholder="Ej: 6953020f80b27952c6e78a7a" value="${escapeHtml(binId)}"/>
+        </div>
+        <div>
+          <label>Tipo de Key</label>
+          <select id="syncKeyType">
+            <option value="access">Access Key (recomendado)</option>
+            <option value="master">Master Key</option>
+          </select>
+          <div class="hint">Access Key es más seguro para usar en varios dispositivos.</div>
+        </div>
+        <div>
+          <label>API Key</label>
+          <input id="syncApiKey" placeholder="Pegá tu Access o Master Key" value="${escapeHtml(apiKey)}"/>
+        </div>
+
+        <div>
+          <label>Pull cada (segundos)</label>
+          <input id="syncPullEvery" type="number" min="3" step="1" value="${pullEvery}"/>
+          <div class="hint">Trae cambios automáticamente.</div>
+        </div>
+        <div>
+          <label>Acciones</label>
+          <div class="row" style="flex-wrap:wrap;gap:8px">
+            <button class="btn" id="syncTest">Probar conexión</button>
+            <button class="btn ok" id="syncPush">Subir ahora</button>
+            <button class="btn" id="syncPull">Traer de nube</button>
+          </div>
+          <div class="hint" style="margin-top:8px">Si hay conflicto, elegí cómo resolverlo abajo.</div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+      <div class="grid2">
+        <div>
+          <div class="card" style="padding:12px">
+            <div style="font-weight:900;margin-bottom:6px">Resolver conflicto</div>
+            <div class="hint">Aparece cuando hay cambios locales sin subir y la nube está más nueva.</div>
+            <div class="row" style="flex-wrap:wrap;gap:8px;margin-top:10px">
+              <button class="btn warn" id="syncKeepLocal" ${_conflictRemote ? "" : "disabled"}>Mantener LOCAL (pisar nube)</button>
+              <button class="btn danger" id="syncUseCloud" ${_conflictRemote ? "" : "disabled"}>Usar NUBE (reemplazar local)</button>
+              <button class="btn" id="syncMerge" ${_conflictRemote ? "" : "disabled"}>Merge básico</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="hint">
+            Consejo: la primera vez, en el dispositivo que tiene los datos correctos tocá <b>Subir ahora</b>.
+            En los otros tocá <b>Traer de nube</b>.
+          </div>
+        </div>
+      </div>
+    `);
+
+    function saveCfgFromUI(){
+      store.data = store.data && typeof store.data==="object" ? store.data : seedData();
+      store.data.settings = store.data.settings && typeof store.data.settings==="object" ? store.data.settings : {};
+      store.data.settings.cloudEnabled = !!$("#syncEnabled").checked;
+      store.data.settings.cloudBinId = ($("#syncBinId").value||"").trim();
+      store.data.settings.cloudKeyType = ($("#syncKeyType").value==="master" ? "master" : "access");
+      store.data.settings.cloudApiKey = ($("#syncApiKey").value||"").trim();
+      // backward-compat (older builds read cloudMasterKey)
+      if(store.data.settings.cloudKeyType==="master") store.data.settings.cloudMasterKey = store.data.settings.cloudApiKey;
+      store.data.settings.cloudPullEverySec = Math.max(3, Number($("#syncPullEvery").value||10));
+      // guardamos también en un storage liviano para que no vuelva a OFF al recargar
+      writeSyncCfgFallback({
+        cloudEnabled: store.data.settings.cloudEnabled,
+        cloudBinId: store.data.settings.cloudBinId,
+        cloudKeyType: store.data.settings.cloudKeyType,
+        cloudApiKey: store.data.settings.cloudApiKey,
+        cloudPullEverySec: store.data.settings.cloudPullEverySec,
+      });
+      store.safeSave();
+    }
+
+        $("#syncKeyType").value = (keyType==="master"?"master":"access") || "access";
+$("#syncEnabled").addEventListener("change", () => { saveCfgFromUI(); startCloudPull(); });
+    $("#syncBinId").addEventListener("change", saveCfgFromUI);
+    $("#syncKeyType").addEventListener("change", saveCfgFromUI);
+    $("#syncApiKey").addEventListener("change", saveCfgFromUI);
+    $("#syncPullEvery").addEventListener("change", () => { saveCfgFromUI(); startCloudPull(); });
+
+    $("#syncTest").addEventListener("click", async () => {
+      saveCfgFromUI();
+      if(!cloudReady()){ toast("Faltan BIN ID o API Key"); return; }
+      setSyncStatus("idle","Probando…");
+      try{ await cloudFetchRecord(); setSyncStatus("ok","Conexión OK"); toast("Conexión OK ✅"); }
+      catch(e){ setSyncStatus("err","No conecta"); toast("No conecta ⚠️"); console.warn(e); }
+    });
+
+    $("#syncPush").addEventListener("click", async () => {
+      saveCfgFromUI();
+      if(!cloudReady()){ toast("Faltan BIN ID o API Key"); return; }
+      try{
+        setSyncStatus("pushing","Subiendo…");
+        await cloudPutRecord(store.data);
+        store.data.meta.dirty = false;
+        store.safeSave();
+        setSyncStatus("ok","Subido");
+        toast("Subido a nube ☁️");
+      }catch(e){
+        setSyncStatus("err","Error al subir");
+        toast("Error al subir ⚠️");
+        console.warn(e);
+      }
+    });
+
+    $("#syncPull").addEventListener("click", async () => {
+      saveCfgFromUI();
+      if(!cloudReady()){ toast("Faltan BIN ID o API Key"); return; }
+      await cloudPullOnce();
+      setSyncStatus(_syncState, _syncMsg);
+    });
+
+    $("#syncKeepLocal").addEventListener("click", async () => {
+      if(!_conflictRemote) return;
+      saveCfgFromUI();
+      if(!cloudReady()){ toast("Faltan BIN ID o API Key"); return; }
+      if(!confirm("Esto va a reemplazar la nube con tu dato LOCAL. ¿Seguro?")) return;
+      try{
+        setSyncStatus("pushing","PISANDO nube…");
+        await cloudPutRecord(store.data);
+        _conflictRemote = null;
+        store.data.meta.dirty = false;
+        store.safeSave();
+        setSyncStatus("ok","Resuelto (LOCAL)");
+        toast("Conflicto resuelto: quedó LOCAL ✅");
+        modal.close();
+      }catch(e){
+        setSyncStatus("err","No se pudo subir");
+        toast("No se pudo subir ⚠️");
+        console.warn(e);
+      }
+    });
+
+    $("#syncUseCloud").addEventListener("click", async () => {
+      if(!_conflictRemote) return;
+      if(!confirm("Esto va a reemplazar tu dato LOCAL por la NUBE. ¿Seguro?")) return;
+      store.data = _conflictRemote;
+      ensureMeta();
+      store.safeSave();
+      _conflictRemote = null;
+      setSyncStatus("ok","Resuelto (NUBE)");
+      renderAll();
+      toast("Conflicto resuelto: quedó NUBE ✅");
+      modal.close();
+    });
+
+    $("#syncMerge").addEventListener("click", async () => {
+      if(!_conflictRemote) return;
+      // merge básico por ID (ventas, cierres, inventario sessions)
+      const local = store.data;
+      const remote = _conflictRemote;
+
+      function mergeById(arrA, arrB){
+        const m = new Map();
+        (arrA||[]).forEach(it => m.set(it.id, it));
+        (arrB||[]).forEach(it => {
+          const cur = m.get(it.id);
+          if(!cur) m.set(it.id, it);
+          else{
+            const ta = Number(cur.updatedAt || cur.dt || 0);
+            const tb = Number(it.updatedAt || it.dt || 0);
+            if(tb > ta) m.set(it.id, it);
+          }
+        });
+        return Array.from(m.values());
+      }
+
+      const merged = structuredClone ? structuredClone(remote) : JSON.parse(JSON.stringify(remote));
+      merged.sales = mergeById(remote.sales, local.sales);
+      merged.closes = mergeById(remote.closes, local.closes);
+      merged.inventory ||= { sessions: [], current: null, carryEnabled: true };
+      merged.inventory.sessions = mergeById((remote.inventory||{}).sessions, (local.inventory||{}).sessions);
+      // settings: prefer el más nuevo
+      const la = Number(local?.meta?.updatedAt||0);
+      const ra = Number(remote?.meta?.updatedAt||0);
+      if(la > ra) merged.settings = local.settings;
+
+      // tables: preferir el que tenga order más nuevo por mesa
+      merged.tables ||= { count: (merged.settings?.tablesCount||12), orders: {} };
+      merged.tables.orders ||= {};
+      const allT = new Set([...(Object.keys(remote?.tables?.orders||{})), ...(Object.keys(local?.tables?.orders||{}))]);
+      allT.forEach(tid => {
+        const ro = remote?.tables?.orders?.[tid] || null;
+        const lo = local?.tables?.orders?.[tid] || null;
+        if(!ro) merged.tables.orders[tid]=lo;
+        else if(!lo) merged.tables.orders[tid]=ro;
+        else{
+          const rts = Number(ro.updatedAt||ro.startedAt||0);
+          const lts = Number(lo.updatedAt||lo.startedAt||0);
+          merged.tables.orders[tid] = (lts>rts) ? lo : ro;
+        }
+      });
+
+      store.data = merged;
+      ensureMeta();
+      store.safeSave();
+      _conflictRemote = null;
+      setSyncStatus("ok","Resuelto (MERGE)");
+      renderAll();
+      toast("Conflicto resuelto: merge ✅");
+      modal.close();
+      // subir merge
+      scheduleCloudPush();
+    });
+  }
+
+// ---------- Exportar / Importar (JSON) ----------
+  const _btnBackup = $("#btnBackup");
+  if(_btnBackup) _btnBackup.addEventListener("click", () => {
+modal.open("Exportar / Importar (JSON)", `
+      <div class="hint">
+        Esto te sirve para pasar datos a otro celular/PC o guardar copia.
+      </div>
+      <div class="sep"></div>
+      <div class="row" style="justify-content:space-between">
+        <button class="btn primary" id="bkExport">⬇️ Exportar JSON</button>
+        <label class="btn" style="cursor:pointer">
+          ⬆️ Importar JSON
+          <input id="bkImport" type="file" accept=".json,application/json" style="display:none" />
+        </label>
+      </div>
+      <div class="sep"></div>
+      <div class="row" style="justify-content:space-between;gap:8px">
+<div class="hint" style="flex:1; margin:0">
+          Configurá BIN ID + Key para sincronizar entre dispositivos.
+        </div>
+      </div>
+      <div class="sep"></div>
+      <div class="hint">
+        Recomendación: guardá un backup semanal. Si importás, se reemplazan los datos actuales.
+      </div>
+    `);
+
+    const _bkSync = $("#bkOpenSyncBtn");
+    if(_bkSync) _bkSync.addEventListener("click", () => { openSyncModal(); });
+
+    $("#bkExport").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(store.data, null, 2)], { type: "application/json" });
+      downloadBlob(blob, `control_asaditos_backup_${isoLocalDate(new Date())}.json`);
+      toast("Backup exportado ✅");
+    });
+
+    $("#bkImport").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const text = await file.text();
+      try{
+        const obj = JSON.parse(text);
+        if (!obj || !obj.products || !obj.clients || !obj.sales) throw new Error("Formato inválido");
+        if (!confirm("¿Importar y reemplazar datos actuales?")) return;
+        store.data = obj;
+        store.save();
+        modal.close();
+      try{ cloudPushNow?.(); }catch(e){}
+        toast("Importado ✅");
+        boot();
+      }catch(err){
+        toast("No se pudo importar: " + err.message);
+      }
+    });
+  });
+
+  // ---------- Reset ----------
+  $("#btnReset").addEventListener("click", () => {
+    modal.open("Reiniciar datos", `
+      <div class="hint">
+        Esto borra todo (ventas, cierres, productos, clientes) del dispositivo.
+      </div>
+      <div class="sep"></div>
+      <div class="row" style="justify-content:space-between">
+        <button class="btn danger" id="doReset">Borrar todo</button>
+        <button class="btn" id="cancelReset">Cancelar</button>
+      </div>
+    `);
+    $("#cancelReset").addEventListener("click", () => modal.close());
+    $("#doReset").addEventListener("click", () => {
+      if (!confirm("Última confirmación: ¿Borrar TODO?")) return;
+      store.reset();
+      modal.close();
+      toast("Datos reiniciados");
+      boot();
+    });
+  });
+
+  // ---------- Utilities ----------
+  function downloadBlob(blob, filename){
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+  function escapeAttr(s){ return escapeHtml(s).replaceAll("\n"," "); }
+
+  // ---------- Boot ----------
+  function boot(){
+    store.load();
+    // Supabase mode: forzar sync habilitado siempre
+    try{ store.data.settings ||= {}; store.data.settings.cloudEnabled = true; store.data.settings.cloudPullEverySec = Number(store.data.settings.cloudPullEverySec||5); store.safeSave(); }catch(e){}
+
+
+// ---- Global hooks for sync deletes (tombstones) ----
+window.__APP_STORE = window.__APP_STORE || store;
+if (typeof window.markDeleted !== "function"){
+  window.markDeleted = function(kind, id){
+    try{
+      const st = window.__APP_STORE;
+      if(!st || !st.data) return;
+      st.data.meta ||= {};
+      st.data.meta.tombstones ||= {};
+      const t = st.data.meta.tombstones;
+      t[kind] ||= {};
+      t[kind][id] = Date.now();
+      st.data.meta.updatedAt = Date.now();
+      st.data.meta.dirty = true;
+      if(st && typeof st.safeSave === "function") st.safeSave();
+      else if(st && typeof st.save === "function") st.save();
+    }catch(e){}
+  };
+}
+// -----------------------------------------------
+
+    // si el store no trae config de sync, intentamos hidratarla
+    try{ hydrateSyncSettingsFromFallback(); }catch(e){}
+    try{ ensureMeta(); if(cloudReady()){ startCloudPull(); setSyncStatus("idle","Listo"); } else { setSyncStatus("off","OFF"); } }catch{}
+
+    if (!store.data) { store.data = seedData(); if(store && typeof store.safeSave==="function") store.safeSave(); }
+    // re-hidratamos una vez más por si seedData pisó settings
+    try{ hydrateSyncSettingsFromFallback(); }catch(e){}
+
+    // Iniciar sync en segundo plano aunque no abras el modal
+    try{
+      ensureMeta();
+      if(cloudReady()){
+        startCloudPull();
+        cloudPullOnce(); // primer pull inmediato
+      }
+      startBgSyncMgr();
+    }catch(e){}
+
+    // header sub
+    $("#hdrSub").textContent = `${store.data.settings?.business || "Asaditos"} · Sin stock · Offline (local)`;
+
+    // render selectors and default state
+    renderClientSelect();
+    ensureDefaults();
+    renderCategories("Todos");
+    renderProductGrid("Todos");
+    renderCart();
+    ensureTables();
+    renderTableChips();
+    renderPendingTables();
+    updateInvStatus();
+    renderDenoms();
+
+    (tmpEl = $("#btnSync")) && tmpEl.addEventListener("click", openSyncModal);
+    $("#btnInv").addEventListener("click", openInventorySetup);
+    $("#floatCashBtn")?.addEventListener("click", openCashCounterModal);
+    $("#btnOpenCashCounter")?.addEventListener("click", openCashCounterModal);
+
+    
+    $("#btnTablesManage").addEventListener("click", () => {
+      ensureTables();
+      const count = tablesCount();
+      const cards = [];
+      for (let i=1;i<=count;i++){
+        const id = tableIdFromNum(i);
+        const st = tableState(id);
+        let total = 0;
+        let desc = "Libre";
+        if (st.order){
+          total = saleTotals((st.order.items||[]).map(it => ({productId:it.productId, qty:it.qty}))).total;
+          const names = (st.order.items||[]).slice(0,3).map(it => product(it.productId)?.name||"Producto").join(" · ");
+          desc = names || "—";
+        }
+        cards.push(`
+          <div class="tableCard ${st.cls.replace("table-","")}" data-tid="${id}">
+            <div class="top">
+              <div>
+                <div class="tTitle">${escapeHtml(tableLabel(id))}</div>
+                <div class="tMeta">${st.order ? (st.cls==="table-overdue" ? "Demora: " : "Pendiente: ") + st.mins + " min" : "Libre"}</div>
+              </div>
+              <div class="tTotal">${st.order ? fmtGs(total) : ""}</div>
+            </div>
+            <div class="desc" style="margin-top:6px">${escapeHtml(desc)}</div>
+            <div class="btnRow">
+              ${st.order ? `
+                <button class="btn small primary" data-act="pay">Cobrar</button>
+                <button class="btn small" data-act="load">Abrir/Editar</button>
+                <button class="btn small danger" data-act="clear">Cancelar</button>
+              ` : `
+                <button class="btn small" data-act="select">Seleccionar</button>
+              `}
+            </div>
+          </div>
+        `);
+      }
+      modal.open("Mesas", `<div class="tableBoard">${cards.join("")}</div>
+        <div class="hint" style="margin-top:10px">🟢 Libre · 🟡 Pendiente · 🔴 Mucha demora (>${tableOverdueMin()} min)</div>
+      `);
+
+      $$("#mBody .tableCard").forEach(card => {
+        const tid = card.dataset.tid;
+        card.querySelector('[data-act="select"]')?.addEventListener("click", () => {
+          state.selectedTable = tid;
+          state.loadedTableId = null;
+          renderTableChips();
+          renderCart();
+          modal.close();
+          toast("Mesa seleccionada");
+        });
+        card.querySelector('[data-act="load"]')?.addEventListener("click", () => { modal.close(); loadTableToCart(tid); });
+        card.querySelector('[data-act="pay"]')?.addEventListener("click", () => { modal.close(); quickPayTable(tid); });
+        card.querySelector('[data-act="clear"]')?.addEventListener("click", () => { clearTable(tid); modal.close(); });
+      });
+    });
+// history defaults
+    els.hFrom.value = isoLocalDate(new Date());
+    els.hTo.value = isoLocalDate(new Date());
+    els.hSearch.value = "";
+    // cierre default
+    els.cDate.value = isoLocalDate(new Date());
+    els.cCash.value = "";
+    els.cCard.value = "";
+    els.cCredit.value = "";
+    els.cNote.value = "";
+    // lists
+    renderClientes();
+    renderProductos();
+    renderCierre();
+
+    setView(state.view || "ventas");
+  }
+
+  boot();
+})();
+
+</script>
+
+  <button id="floatCashBtn" class="btn small">💵 <small id="floatCashTotal">Gs 0</small></button>
+</body>
+</html>
