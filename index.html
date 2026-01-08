@@ -7,6 +7,7 @@
   <title>Control Asaditos</title>
   <style>
 
+
     :root{
       --bg:#0b1220;
       --panel:#0f1a2e;
@@ -513,6 +514,36 @@ header .pill small{
   font-size: 10px;
 }
 
+
+
+/* ===== Mobile optimizations ===== */
+@media (max-width: 720px){
+  /* Ocultar título grande para ganar espacio */
+  header .title{ font-size: 18px; line-height: 1.1; margin: 0; }
+  header .sub{ display:none; }
+  /* Compactar header */
+  header{ padding: 10px 12px; }
+}
+
+/* Barra fija de acciones en Ventas */
+.sticky-actions{
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  backdrop-filter: blur(8px);
+  background: rgba(15, 17, 20, 0.75);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  z-index: 60;
+}
+.sticky-actions .row{ gap:10px; justify-content:space-between; }
+.sticky-actions .btn{ flex: 1; }
+/* Dejar espacio para que el contenido no quede tapado por la barra */
+#view-ventas{ padding-bottom: 86px; }
+@media (min-width: 721px){
+  .sticky-actions{ display:none; }
+  #view-ventas{ padding-bottom: 0; }
+}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -533,6 +564,10 @@ header .pill small{
         <button class="pill" id="btnInv" title="Inventario del día">
           📦 <small>Inventario</small>
         </button>
+        <button class="pill" id="btnMenu" title="Menú">
+          ☰ <small>Menú</small>
+        </button>
+
         <button class="pill" id="btnBackup" title="Exportar / Importar JSON">
           ⬇️⬆️ <small>Export/Import</small>
         </button>
@@ -686,7 +721,17 @@ header .pill small{
       </div>
     </section>
 
-    <!-- HISTORIAL -->
+    
+    <!-- Barra fija (móvil): acciones rápidas -->
+    <div class="sticky-actions" id="stickyActions">
+      <div class="row">
+        <button class="btn" id="btnStickyPending">Dejar pendiente ⏳</button>
+        <button class="btn primary" id="btnStickyPay">Cobrar ✅</button>
+      </div>
+    </div>
+
+
+<!-- HISTORIAL -->
     <section id="view-historial" class="hide">
       <div class="card">
         <div class="hd">
@@ -961,6 +1006,7 @@ header .pill small{
   <div class="toast" id="toast">—</div>
 
 <script>
+
 
 
 
@@ -1774,6 +1820,36 @@ function setView(name){
     $$("section[id^='view-']").forEach(s => s.classList.add("hide"));
     $("#view-" + name).classList.remove("hide");
     $$(".nav button").forEach(b => b.classList.toggle("active", b.dataset.view === name));
+
+  // ---------- Menú compacto (sin pestañas visibles) ----------
+(tmpEl = $("#btnMenu")) && tmpEl.addEventListener("click", () => {
+  modal.open("Menú", `
+    <div class="row" style="gap:10px; flex-wrap:wrap">
+      <button class="btn" data-go="ventas">Ventas</button>
+      <button class="btn" data-go="historial">Historial</button>
+      <button class="btn" data-go="cierre">Cierre</button>
+      <button class="btn" data-go="clientes">Clientes</button>
+      <button class="btn" data-go="productos">Productos</button>
+      <button class="btn" data-go="mesas">Mesas</button>
+    </div>
+    <div class="sep"></div>
+    <div class="hint">Tip: “Cobrar” y “Pendiente” quedan fijos abajo en móvil.</div>
+  `);
+  $$("button[data-go]").forEach(b => b.addEventListener("click", () => {
+    const v = b.getAttribute("data-go");
+    modal.close();
+    setView(v);
+  }));
+});
+
+// ---------- Barra fija (móvil): enlazar acciones ----------
+(tmpEl = $("#btnStickyPay")) && tmpEl.addEventListener("click", () => {
+  $("#btnSaveSale")?.click();
+});
+(tmpEl = $("#btnStickyPending")) && tmpEl.addEventListener("click", () => {
+  $("#btnSavePending")?.click();
+});
+
 
     // Sync UI: mostrar solo en la vista principal (ventas) para que en el celu no moleste.
     const btnSync = document.querySelector("#btnSync");
@@ -3999,6 +4075,7 @@ if (typeof window.markDeleted !== "function"){
 
   boot();
 })();
+
 
 
 
