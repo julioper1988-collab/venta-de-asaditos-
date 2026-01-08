@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#0b1220" />
   <title>Control Asaditos</title>
   <style>
+
     :root{
       --bg:#0b1220;
       --panel:#0f1a2e;
@@ -500,6 +501,18 @@
 
   /* Sync badge: ancho fijo para que no mueva el layout */
   #syncBadge{ display:inline-block; min-width:72px; text-align:center; }
+
+
+/* Compactar botones superiores (Inventario / Export-Import) */
+header .pill{
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.1;
+}
+header .pill small{
+  font-size: 10px;
+}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -512,7 +525,7 @@
         <div class="logo">A</div>
         <div style="min-width:0">
           <h1>Control Asaditos</h1>
-          <div class="sub" id="hdrSub">Supabase · Sync automático</div>
+          <div class="sub" id="hdrSub">Supabase · iniciando…</div>
         </div>
       </div>
       <div class="row">
@@ -949,6 +962,8 @@
 
 <script>
 
+
+
 /* -----------------------------
    Control Asaditos (offline)
    - Datos en localStorage
@@ -1152,6 +1167,22 @@
 
   function normalizeName(s){ return String(s||"").trim().toUpperCase(); }
 
+  // ---------- Nombres únicos de productos (evitar duplicados) ----------
+function canonicalName(s){
+  return String(s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+function productNameExistsCanonical(name, excludeId){
+  const key = canonicalName(name);
+  if(!key) return false;
+  return (store.data?.products || []).some(p => p && p.id !== excludeId && p.active !== false && canonicalName(p.name) === key);
+}
+
+
   function ensureDefaultProducts(){
     if (!store.data) return;
     store.data.products ||= [];
@@ -1233,6 +1264,39 @@ function cloudReady(){
   return !!sb;
 }
 
+
+
+// ---------- Indicador simple de nube (sin modal) ----------
+let _lastCloudOkAt = 0;
+let _lastCloudErrAt = 0;
+let _lastCloudErrMsg = "";
+function cloudOkPing(){
+  _lastCloudOkAt = Date.now();
+}
+function cloudErrPing(e){
+  _lastCloudErrAt = Date.now();
+  _lastCloudErrMsg = (e && (e.message||String(e))) ? (e.message||String(e)) : "Error nube";
+}
+function updateHdrCloud(){
+  try{
+    const el = document.querySelector("#hdrSub");
+    if(!el) return;
+    const biz = (store?.data?.settings?.business || "Asaditos");
+    if(!cloudReady()){
+      el.textContent = `${biz} · Nube: OFF (sin conexión a Supabase)`;
+      return;
+    }
+    const sinceOk = _lastCloudOkAt ? Math.round((Date.now()-_lastCloudOkAt)/1000) : null;
+    const sinceErr = _lastCloudErrAt ? Math.round((Date.now()-_lastCloudErrAt)/1000) : null;
+    if(_lastCloudErrAt && (!_lastCloudOkAt || _lastCloudErrAt > _lastCloudOkAt)){
+      el.textContent = `${biz} · Nube: ERROR (${sinceErr}s)`;
+    }else{
+      el.textContent = `${biz} · Nube: OK${sinceOk!==null?` (${sinceOk}s)`:""}`;
+    }
+  }catch(e){}
+}
+setInterval(updateHdrCloud, 1500);
+
 // Persistencia extra de configuración Sync (por si el store se resetea / falla localStorage)
 const SYNC_CFG_KEY = "CG_SYNC_CFG_V1";
 function readSyncCfgFallback(){
@@ -1276,6 +1340,7 @@ async function cloudFetchRecord(){
   if(error && status !== 406){
     throw new Error(`Cloud GET ${status||"ERR"}`);
   }
+  try{ cloudOkPing(); }catch(e){}
   return (data && data.record) ? data.record : null;
 }
 
@@ -1288,6 +1353,7 @@ async function cloudPutRecord(record){
   if(error){
     throw new Error(`Cloud PUT ${status||"ERR"}`);
   }
+  try{ cloudOkPing(); }catch(e){}
   return true;
 }
 
@@ -1560,10 +1626,13 @@ async function cloudPullOnce(){
       toast("Datos actualizados desde nube ☁️");
     }
     _lastPulledRev = rrev;
-  }catch(e){
+  }
+  catch(e){
+    try{ cloudErrPing(e); }catch(_e){}
     console.warn(e);
   }
 }
+
 
 function startCloudPull(){
   stopCloudPull();
@@ -3370,7 +3439,13 @@ HIELO 1 KILO;700;1000`;
     $("#pSave").addEventListener("click", () => {
       const name = ($("#pName").value||"").trim();
       if (!name){ toast("Falta el nombre"); return; }
-      const category = ($("#pCat").value||"Otros").trim() || "Otros";
+      
+      // No permitir nombres repetidos (ignora tildes/mayúsculas/espacios)
+      if(productNameExistsCanonical(name, id)){
+        toast("Ya existe un producto con ese nombre ❌");
+        return;
+      }
+const category = ($("#pCat").value||"Otros").trim() || "Otros";
       const price = numFromInput($("#pPrice").value);
       const cost = numFromInput($("#pCost").value);
       const active = $("#pActive").value === "true";
@@ -3924,6 +3999,8 @@ if (typeof window.markDeleted !== "function"){
 
   boot();
 })();
+
+
 
 </script>
 
