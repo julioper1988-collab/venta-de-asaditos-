@@ -954,6 +954,7 @@ header .pill small{
           </div>
           <div class="row" style="gap:8px">
             <button class="btn small" id="btnImportCosts">⬇️ Importar costos</button>
+            <button class="btn small" id="btnDedupProducts">🧹 Borrar duplicados</button>
             <button class="btn small primary" id="btnNewProd2">➕ Producto</button>
           </div>
         </div>
@@ -1006,6 +1007,7 @@ header .pill small{
   <div class="toast" id="toast">—</div>
 
 <script>
+
 
 
 
@@ -1222,6 +1224,56 @@ function canonicalName(s){
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 }
+
+  // ---------- Productos: borrar duplicados ----------
+function dedupeProducts(){
+  const prods = (store.data?.products || []);
+  if(!prods.length){ toast("No hay productos"); return 0; }
+
+  // Regla: duplicado = mismo nombre canónico (sin tildes / mayúsculas / símbolos)
+  // Conservamos 1: prioriza activo, y si hay empate, el de id más antiguo (orden actual).
+  const seen = new Map(); // key -> product kept
+  const out = [];
+  let removed = 0;
+
+  for(const p of prods){
+    if(!p || !p.name){ out.push(p); continue; }
+    const key = canonicalName(p.name);
+    if(!key){ out.push(p); continue; }
+
+    if(!seen.has(key)){
+      seen.set(key, p);
+      out.push(p);
+    }else{
+      const kept = seen.get(key);
+      const pActive = (p.active !== false);
+      const kActive = (kept.active !== false);
+
+      if(pActive && !kActive){
+        // reemplazar: dejamos el activo
+        const idx = out.findIndex(x => x && x.id === kept.id);
+        if(idx >= 0) out[idx] = p;
+        seen.set(key, p);
+        removed++;
+        continue;
+      }
+      // Si ambos activos o ambos inactivos, descartamos el nuevo (p)
+      removed++;
+    }
+  }
+
+  if(removed){
+    store.data.products = out.filter(Boolean);
+    store.save();
+    try{ cloudPushNow?.(); }catch(e){}
+    toast(`Duplicados eliminados: ${removed} ✅`);
+    refreshAllCatalogViews?.();
+  }else{
+    toast("No encontré duplicados ✅");
+  }
+  return removed;
+}
+
 function productNameExistsCanonical(name, excludeId){
   const key = canonicalName(name);
   if(!key) return false;
@@ -3393,6 +3445,13 @@ div.querySelector('[data-act="clear"]').addEventListener("click", () => clearTab
   $("#btnNewProd2").addEventListener("click", () => openProductForm(null));
   $("#btnImportCosts").addEventListener("click", () => openImportCosts());
 
+  (tmpEl = $("#btnDedupProducts")) && tmpEl.addEventListener("click", () => {
+  const n = (store.data?.products || []).length;
+  if(n < 2){ toast("No hay duplicados"); return; }
+  if(!confirm("¿Eliminar productos duplicados por nombre? (se conserva 1 por nombre)")) return;
+  dedupeProducts();
+});
+
   function normalizeName(s){
     return String(s || "").toLowerCase()
       .normalize("NFD")
@@ -4075,6 +4134,7 @@ if (typeof window.markDeleted !== "function"){
 
   boot();
 })();
+
 
 
 
