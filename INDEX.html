@@ -1012,7 +1012,6 @@ header .pill small{
 
 
 
-
 /* -----------------------------
    Control Asaditos (offline)
    - Datos en localStorage
@@ -1110,6 +1109,7 @@ header .pill small{
 
       // add missing default products for older stores
       ensureDefaultProducts();
+    try{ dedupeProductsSilent(); }catch(e){}
     },
 
     save(){
@@ -1216,7 +1216,7 @@ header .pill small{
 
   function normalizeName(s){ return String(s||"").trim().toUpperCase(); }
 
-  // ---------- Nombres únicos de productos (evitar duplicados) ----------
+  // ---------- Nombres únicos de productos / deduplicación ----------
 function canonicalName(s){
   return String(s || "")
     .toLowerCase()
@@ -1226,7 +1226,6 @@ function canonicalName(s){
     .trim();
 }
 
-  // ---------- Productos: borrar duplicados ----------
 function dedupeProductsCore(silent){
   const prods = (store.data?.products || []);
   if(!prods.length){ if(!silent) toast("No hay productos"); return 0; }
@@ -1264,16 +1263,25 @@ function dedupeProductsCore(silent){
     store.save();
     try{ cloudPushNow?.(); }catch(e){}
     if(!silent) toast(`Duplicados eliminados: ${removed} ✅`);
-    refreshAllCatalogViews?.();
+    try{ refreshAllCatalogViews?.(); }catch(e){}
   }else{
     if(!silent) toast("No encontré duplicados ✅");
   }
   return removed;
 }
-
 function dedupeProducts(){ return dedupeProductsCore(false); }
 function dedupeProductsSilent(){ return dedupeProductsCore(true); }
 
+
+  // ---------- Nombres únicos de productos (evitar duplicados) ----------
+function canonicalName(s){
+  return String(s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
 function productNameExistsCanonical(name, excludeId){
   const key = canonicalName(name);
   if(!key) return false;
@@ -1875,6 +1883,16 @@ function setView(name){
     $("#view-" + name).classList.remove("hide");
     $$(".nav button").forEach(b => b.classList.toggle("active", b.dataset.view === name));
 
+  function hookMenuDedup(){
+  const b = $("#menuDedup");
+  if(!b) return;
+  b.addEventListener("click", () => {
+    modal.close();
+    if(!confirm("¿Eliminar productos duplicados por nombre?")) return;
+    dedupeProducts();
+  });
+}
+
   // ---------- Menú compacto (sin pestañas visibles) ----------
 (tmpEl = $("#btnMenu")) && tmpEl.addEventListener("click", () => {
   modal.open("Menú", `
@@ -1884,12 +1902,14 @@ function setView(name){
       <button class="btn" data-go="cierre">Cierre</button>
       <button class="btn" data-go="clientes">Clientes</button>
       <button class="btn" data-go="productos">Productos</button>
+        <button class="btn" id="menuDedup">🧹 Borrar duplicados</button>
       <button class="btn" data-go="mesas">Mesas</button>
     </div>
     <div class="sep"></div>
     <div class="hint">Tip: “Cobrar” y “Pendiente” quedan fijos abajo en móvil.</div>
   `);
-  $$("button[data-go]").forEach(b => b.addEventListener("click", () => {
+      setTimeout(hookMenuDedup, 0);
+$$("button[data-go]").forEach(b => b.addEventListener("click", () => {
     const v = b.getAttribute("data-go");
     modal.close();
     setView(v);
@@ -4137,7 +4157,6 @@ if (typeof window.markDeleted !== "function"){
 
   boot();
 })();
-
 
 
 
