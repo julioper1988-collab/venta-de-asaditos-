@@ -1045,6 +1045,7 @@ header .pill small{
 
 
 
+
 /* -----------------------------
    Control Asaditos (offline)
    - Datos en localStorage
@@ -1130,6 +1131,8 @@ header .pill small{
       // ensure arrays/objects
       this.data.products ||= [];
       this.data.clients ||= [];
+      ensureDefaultClients();
+      try{ dedupeClientsSilent(); }catch(e){}
       this.data.sales ||= [];
       this.data.closes ||= [];
       this.data.expenses ||= [];
@@ -1200,10 +1203,11 @@ header .pill small{
 
       { id: uid(), name: "MISIONERO", category: "Bebidas", price: 6000, cost: 0, active: true },
     ];
-    const clients = [
-      { id: uid(), name: "Ocasional", type: "Local", defaultPay: "Efectivo", active: true, notes: "" },
-      { id: uid(), name: "PedidosYa", type: "Delivery", defaultPay: "Crédito", active: true, notes: "Por defecto va a Crédito" },
-    ];
+    
+const clients = [
+  { id: "client_ocasional", name: "Ocasional", type: "Local", defaultPay: "Efectivo", active: true, notes: "" },
+  { id: "client_pedidosya", name: "PedidosYa", type: "Delivery", defaultPay: "Crédito", active: true, notes: "Por defecto va a Crédito" },
+];
     return {
       version: 2,
       createdAt: new Date().toISOString(),
@@ -1259,6 +1263,69 @@ function canonicalName(s){
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 }
+
+  // ---------- Clientes: evitar duplicados (Ocasional / PedidosYa y otros) ----------
+function dedupeClientsCore(silent){
+  const arr = (store.data?.clients || []);
+  if(!arr.length) return 0;
+  const seen = new Map();
+  const out = [];
+  let removed = 0;
+
+  for(const c of arr){
+    if(!c || !c.name){ out.push(c); continue; }
+    const key = canonicalName(c.name);
+    if(!key){ out.push(c); continue; }
+
+    if(!seen.has(key)){
+      if(key==="ocasional") c.id = "client_ocasional";
+      if(key==="pedidosya") c.id = "client_pedidosya";
+      seen.set(key, c);
+      out.push(c);
+    }else{
+      const kept = seen.get(key);
+      const cActive = (c.active !== false);
+      const kActive = (kept.active !== false);
+
+      const isDefault = (key==="ocasional" || key==="pedidosya");
+      const keptIsDefaultId = (kept && (kept.id==="client_ocasional" || kept.id==="client_pedidosya"));
+
+      if(isDefault && !keptIsDefaultId){
+        const idx = out.findIndex(x => x && x.id === kept.id);
+        if(idx>=0) out[idx] = c;
+        seen.set(key, c);
+        removed++;
+        continue;
+      }
+      if(cActive && !kActive){
+        const idx = out.findIndex(x => x && x.id === kept.id);
+        if(idx>=0) out[idx] = c;
+        seen.set(key, c);
+        removed++;
+        continue;
+      }
+      removed++;
+    }
+  }
+
+  if(removed){
+    store.data.clients = out.filter(Boolean);
+    store.save();
+    try{ cloudPushNow?.(); }catch(e){}
+    if(!silent) toast(`Clientes duplicados eliminados: ${removed} ✅`);
+  }
+  return removed;
+}
+function dedupeClients(){ return dedupeClientsCore(false); }
+function dedupeClientsSilent(){ return dedupeClientsCore(true); }
+
+function ensureDefaultClients(){
+  store.data.clients ||= [];
+  const has = (name)=> (store.data.clients||[]).some(c => c && canonicalName(c.name)===canonicalName(name));
+  if(!has("Ocasional")) store.data.clients.push({ id:"client_ocasional", name:"Ocasional", type:"Local", defaultPay:"Efectivo", active:true, notes:"" });
+  if(!has("PedidosYa")) store.data.clients.push({ id:"client_pedidosya", name:"PedidosYa", type:"Delivery", defaultPay:"Crédito", active:true, notes:"Por defecto va a Crédito" });
+}
+
 
 function dedupeProductsCore(silent){
   const prods = (store.data?.products || []);
@@ -1723,6 +1790,7 @@ async function autoResolveConflict(remote){
   try{
     const merged = mergeRemoteLocal(remote, store.data);
     store.data = merged;
+    try{ ensureDefaultClients(); dedupeClientsSilent(); }catch(e){}
     try{ dedupeProductsSilent(); }catch(e){}
     ensureMeta();
     store.saveLocal?.();
@@ -1761,6 +1829,7 @@ async function cloudPullOnce(){
         return;
       }
       store.data = remote;
+    try{ ensureDefaultClients(); dedupeClientsSilent(); }catch(e){}
     try{ dedupeProductsSilent(); }catch(e){}
       ensureMeta();
       store.saveLocal?.();
@@ -1964,6 +2033,7 @@ function setView(name){
       <button class="btn" data-go="historial">Historial</button>
       <button class="btn" data-go="cierre">Cierre</button>
       <button class="btn" data-go="clientes">Clientes</button>
+        <button class="btn" id="menuCreditos">💳 Ver deudas</button>
       <button class="btn" data-go="productos">Productos</button>
         <button class="btn" id="menuDedup">🧹 Borrar duplicados</button>
       <button class="btn" data-go="mesas">Mesas</button>
@@ -1973,6 +2043,20 @@ function setView(name){
   `);
       setTimeout(hookMenuDedup, 0);
     setTimeout(hookMenuTools, 0);
+
+setTimeout(()=>{
+  const b = $("#menuCreditos");
+  if(b){
+    b.addEventListener("click", ()=>{
+      modal.close();
+      setView("clientes");
+      setTimeout(()=>{ document.getElementById("credList")?.scrollIntoView({behavior:"smooth", block:"start"}); }, 250);
+    });
+  }
+  // etiqueta versión en el hint del menú
+  const h = document.querySelector(".hint");
+  if(h && APP_VERSION && !h.textContent.includes(APP_VERSION)) h.textContent += " · " + APP_VERSION;
+},0);
 $$("button[data-go]").forEach(b => b.addEventListener("click", () => {
     const v = b.getAttribute("data-go");
     modal.close();
@@ -4182,6 +4266,7 @@ $("#syncEnabled").addEventListener("change", () => { saveCfgFromUI(); startCloud
       });
 
       store.data = merged;
+    try{ ensureDefaultClients(); dedupeClientsSilent(); }catch(e){}
     try{ dedupeProductsSilent(); }catch(e){}
       ensureMeta();
       store.safeSave();
@@ -4436,6 +4521,7 @@ if (typeof window.markDeleted !== "function"){
 
   boot();
 })();
+
 
 
 
