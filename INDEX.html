@@ -8,6 +8,7 @@
   <style>
 
 
+
     :root{
       --bg:#0b1220;
       --panel:#0f1a2e;
@@ -520,7 +521,7 @@ header .pill small{
 @media (max-width: 720px){
   /* Ocultar título grande para ganar espacio */
   header .title{ font-size: 18px; line-height: 1.1; margin: 0; }
-  header .sub{ display:none; }
+  header .sub{ display:block; font-size:11px; opacity:.75; }
   /* Compactar header */
   header{ padding: 10px 12px; }
 }
@@ -543,6 +544,7 @@ header .pill small{
   .sticky-actions{ display:none; }
   #view-ventas{ padding-bottom: 0; }
 }
+
 
 </style>
 
@@ -942,6 +944,34 @@ header .pill small{
           <div class="hint" id="cliEmpty" style="display:none">No hay clientes.</div>
         </div>
       </div>
+    <div class="card">
+  <div class="hd">
+    <div>
+      <h2>Créditos</h2>
+      <div class="meta">Saldo adeudado por cliente (Crédito - Pagos)</div>
+    </div>
+    <button class="btn small" id="btnNewPayment">➕ Pago</button>
+  </div>
+  <div class="bd">
+    <div class="fields two">
+      <div>
+        <label>Buscar</label>
+        <input id="credSearch" placeholder="cliente..." />
+      </div>
+      <div>
+        <label>Orden</label>
+        <select id="credSort">
+          <option value="debt_desc">Mayor deuda</option>
+          <option value="debt_asc">Menor deuda</option>
+          <option value="name_asc">Nombre A-Z</option>
+        </select>
+      </div>
+    </div>
+    <div class="sep"></div>
+    <div class="list" id="credList"></div>
+    <div class="hint" id="credEmpty" style="display:none">No hay créditos pendientes.</div>
+  </div>
+</div>
     </section>
 
     <!-- PRODUCTOS -->
@@ -1007,6 +1037,9 @@ header .pill small{
   <div class="toast" id="toast">—</div>
 
 <script>
+
+
+
 
 
 
@@ -1100,6 +1133,7 @@ header .pill small{
       this.data.sales ||= [];
       this.data.closes ||= [];
       this.data.expenses ||= [];
+      this.data.creditPayments ||= [];
       this.data.settings ||= { currency: "Gs", business: "Asaditos", tablesCount: 12 };
       this.data.tables ||= { count: this.data.settings.tablesCount || 12, orders: {} };
       this.data.inventory ||= { sessions: [], current: null, carryEnabled: true };
@@ -1447,6 +1481,7 @@ async function cloudFetchRecord(){
     throw new Error(`Cloud GET ${status||"ERR"}`);
   }
   try{ cloudOkPing(); }catch(e){}
+  cloudOkPing();
   return (data && data.record) ? data.record : null;
 }
 
@@ -1460,6 +1495,7 @@ async function cloudPutRecord(record){
     throw new Error(`Cloud PUT ${status||"ERR"}`);
   }
   try{ cloudOkPing(); }catch(e){}
+  cloudOkPing();
   return true;
 }
 
@@ -1883,6 +1919,33 @@ function setView(name){
     $("#view-" + name).classList.remove("hide");
     $$(".nav button").forEach(b => b.classList.toggle("active", b.dataset.view === name));
 
+  function hookMenuTools(){
+  const bPull = $("#menuForcePull");
+  const bPush = $("#menuForcePush");
+  const bReset = $("#menuResetFromCloud");
+  if(bPull) bPull.addEventListener("click", async () => {
+    modal.close();
+    try{ await cloudPullOnce(); toast("Nube → Local ✅"); }catch(e){ toast("Error al traer de nube"); }
+  });
+  if(bPush) bPush.addEventListener("click", async () => {
+    modal.close();
+    try{ await cloudPushNow(); toast("Local → Nube ✅"); }catch(e){ toast("Error al subir a nube"); }
+  });
+  if(bReset) bReset.addEventListener("click", async () => {
+    modal.close();
+    if(!confirm("Esto reemplaza tus datos locales por lo que está en la nube. ¿Continuar?")) return;
+    try{
+      // borrar local y traer nube
+      store.data = { sales:[], pending:[], products:[], clients:[], settings: store.data?.settings || {} };
+      store.save();
+      await cloudPullOnce();
+      toast("Local reemplazado ✅");
+    }catch(e){
+      toast("No se pudo reemplazar");
+    }
+  });
+}
+
   function hookMenuDedup(){
   const b = $("#menuDedup");
   if(!b) return;
@@ -1909,6 +1972,7 @@ function setView(name){
     <div class="hint">Tip: “Cobrar” y “Pendiente” quedan fijos abajo en móvil.</div>
   `);
       setTimeout(hookMenuDedup, 0);
+    setTimeout(hookMenuTools, 0);
 $$("button[data-go]").forEach(b => b.addEventListener("click", () => {
     const v = b.getAttribute("data-go");
     modal.close();
@@ -3278,6 +3342,216 @@ div.querySelector('[data-act="clear"]').addEventListener("click", () => clearTab
     els.saleClient.innerHTML = clients.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join("");
   }
 
+  
+  // ---------- Créditos (clientes) ----------
+function isCreditPay(pay){
+  // acepta "Crédito", "Credito", "credito", con espacios, etc.
+  const k = canonicalName(String(pay||""));
+  return k === "credito";
+}
+function creditSales(){
+  return (store.data?.sales || []).filter(s => s && isCreditPay(s.pay) && s.clientId && canonicalName(s.clientId) !== "ocasional");
+}
+function creditPayments(){
+  return (store.data?.creditPayments || []).filter(p => p && p.clientId && canonicalName(p.clientId) !== "ocasional");
+}
+function creditBalances(){
+  const map = new Map(); // clientId -> {clientId, name, debt, credits, paid}
+  for(const c of (store.data?.clients || [])){
+    if(!c || c.active === false) continue;
+    map.set(c.id, { clientId: c.id, name: c.name || "—", debt: 0, credits: 0, paid: 0 });
+  }
+  for(const s of creditSales()){
+    const id = s.clientId;
+    if(!map.has(id)) map.set(id, { clientId:id, name: s.clientName || id, debt:0, credits:0, paid:0 });
+    const row = map.get(id);
+    const amt = Number(s.total||0);
+    row.credits += amt;
+    row.debt += amt;
+    if(!row.name || row.name==="—") row.name = s.clientName || id;
+  }
+  for(const p of creditPayments()){
+    const id = p.clientId;
+    if(!map.has(id)) map.set(id, { clientId:id, name: p.clientName || id, debt:0, credits:0, paid:0 });
+    const row = map.get(id);
+    const amt = Number(p.amount||0);
+    row.paid += amt;
+    row.debt -= amt;
+    if(!row.name || row.name==="—") row.name = p.clientName || id;
+  }
+  // return only those with debt > 0.0001
+  return Array.from(map.values()).filter(r => (r.debt || 0) > 0.0001);
+}
+
+function openPaymentModal(prefClientId){
+  const clients = (store.data?.clients || []).filter(c => c && c.active !== false);
+  if(!clients.length){ toast("No hay clientes"); return; }
+
+  modal.open("Registrar pago", `
+    <div class="fields two">
+      <div>
+        <label>Cliente</label>
+        <select id="payClient"></select>
+      </div>
+      <div>
+        <label>Monto (Gs)</label>
+        <input id="payAmount" inputmode="numeric" placeholder="0" />
+      </div>
+    </div>
+    <div class="fields two" style="margin-top:10px">
+      <div>
+        <label>Método</label>
+        <select id="payMethod">
+          <option value="Efectivo">Efectivo</option>
+          <option value="Tarjeta">Tarjeta</option>
+          <option value="Transferencia">Transferencia</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+      <div>
+        <label>Fecha</label>
+        <input id="payDT" type="datetime-local" />
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <label>Obs.</label>
+      <input id="payNotes" placeholder="Ej: abonó 50.000" />
+    </div>
+    <div class="sep"></div>
+    <div class="row" style="gap:10px">
+      <button class="btn" id="payCancel">Cancelar</button>
+      <button class="btn primary" id="paySave">Guardar</button>
+    </div>
+  `);
+
+  const sel = $("#payClient");
+  sel.innerHTML = clients.map(c => `<option value="${escapeAttr(c.id)}">${escapeHtml(c.name)}</option>`).join("");
+  sel.value = prefClientId && clients.some(c=>c.id===prefClientId) ? prefClientId : (clients[0].id);
+
+  // default date now
+  try{
+    const d = new Date();
+    const pad = (n)=> String(n).padStart(2,"0");
+    $("#payDT").value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }catch(e){}
+
+  $("#payCancel").addEventListener("click", ()=> modal.close());
+  $("#paySave").addEventListener("click", ()=>{
+    const clientId = $("#payClient").value;
+    const client = getClient(clientId);
+    const amt = parseGs($("#payAmount").value);
+    if(!clientId){ toast("Elegí cliente"); return; }
+    if(!(amt>0)){ toast("Monto inválido"); return; }
+
+    store.data.creditPayments ||= [];
+    store.data.creditPayments.push({
+      id: uid(),
+      dt: new Date($("#payDT").value || new Date()).toISOString(),
+      clientId,
+      clientName: client?.name || clientId,
+      amount: amt,
+      method: $("#payMethod").value,
+      notes: ($("#payNotes").value||"").trim(),
+      createdAt: new Date().toISOString()
+    });
+    store.save();
+    try{ cloudPushNow?.(); }catch(e){}
+    modal.close();
+    toast("Pago registrado ✅");
+    renderCreditos();
+  });
+}
+
+function renderCreditos(){
+  const box = $("#credList");
+  const empty = $("#credEmpty");
+  if(!box || !empty) return;
+
+  const q = ($("#credSearch")?.value || "").trim().toLowerCase();
+  const sort = $("#credSort")?.value || "debt_desc";
+
+  let rows = creditBalances();
+  if(q){
+    rows = rows.filter(r => (r.name||"").toLowerCase().includes(q));
+  }
+
+  rows.sort((a,b)=>{
+    if(sort==="debt_asc") return (a.debt||0)-(b.debt||0);
+    if(sort==="name_asc") return (a.name||"").localeCompare(b.name||"");
+    return (b.debt||0)-(a.debt||0);
+  });
+
+  if(!rows.length){
+    box.innerHTML = "";
+    empty.style.display = "";
+    return;
+  }
+  empty.style.display = "none";
+
+  box.innerHTML = rows.map(r=>`
+    <div class="row line">
+      <div style="min-width:0">
+        <div class="name">${escapeHtml(r.name)}</div>
+        <div class="meta">Crédito: ${escapeHtml(fmtGs(r.credits))} · Pagos: ${escapeHtml(fmtGs(r.paid))}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="kpi">${escapeHtml(fmtGs(r.debt))}</div>
+        <div class="row" style="gap:6px; justify-content:flex-end; margin-top:6px">
+          <button class="btn small" data-pay="${escapeAttr(r.clientId)}">Pago</button>
+          <button class="btn small" data-det="${escapeAttr(r.clientId)}">Detalle</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+  $$('button[data-pay]').forEach(b=>b.addEventListener("click", ()=> openPaymentModal(b.getAttribute("data-pay"))));
+  $$('button[data-det]').forEach(b=>b.addEventListener("click", ()=> openCreditDetail(b.getAttribute("data-det"))));
+}
+
+function openCreditDetail(clientId){
+  const client = getClient(clientId);
+  const sales = creditSales().filter(s=>s.clientId===clientId).sort((a,b)=> (b.dt||"").localeCompare(a.dt||""));
+  const pays = creditPayments().filter(p=>p.clientId===clientId).sort((a,b)=> (b.dt||"").localeCompare(a.dt||""));
+  const credits = sales.reduce((s,x)=>s+Number(x.total||0),0);
+  const paid = pays.reduce((s,x)=>s+Number(x.amount||0),0);
+  const debt = credits - paid;
+
+  modal.open(`Crédito · ${escapeHtml(client?.name||clientId)}`, `
+    <div class="kpi" style="text-align:center">
+      <div style="font-size:14px; opacity:.8">ADEUDADO</div>
+      <div style="font-size:30px; font-weight:800; margin-top:4px">${escapeHtml(fmtGs(debt))}</div>
+    </div>
+    <div class="sep"></div>
+    <div class="meta"><b>Ventas a crédito</b></div>
+    <div class="list">
+      ${sales.length ? sales.map(s=>`
+        <div class="row line">
+          <div class="meta">${escapeHtml(isoLocalDate(new Date(s.dt)))} · ${escapeHtml(s.channel||"")}</div>
+          <div class="kpi">${escapeHtml(fmtGs(s.total||0))}</div>
+        </div>
+      `).join("") : '<div class="hint">Sin ventas a crédito.</div>'}
+    </div>
+    <div class="sep"></div>
+    <div class="meta"><b>Pagos</b></div>
+    <div class="list">
+      ${pays.length ? pays.map(p=>`
+        <div class="row line">
+          <div class="meta">${escapeHtml(isoLocalDate(new Date(p.dt)))} · ${escapeHtml(p.method||"")}</div>
+          <div class="kpi">-${escapeHtml(fmtGs(p.amount||0))}</div>
+        </div>
+      `).join("") : '<div class="hint">Sin pagos registrados.</div>'}
+    </div>
+    <div class="sep"></div>
+    <div class="row" style="gap:10px">
+      <button class="btn" id="cdClose">Cerrar</button>
+      <button class="btn primary" id="cdPay">Registrar pago</button>
+    </div>
+  `);
+
+  $("#cdClose").addEventListener("click", ()=> modal.close());
+  $("#cdPay").addEventListener("click", ()=> { modal.close(); openPaymentModal(clientId); });
+}
+
   function renderClientes(){
     const q = (els.cliSearch.value||"").trim().toLowerCase();
     const f = els.cliFilter.value;
@@ -3315,6 +3589,11 @@ div.querySelector('[data-act="clear"]').addEventListener("click", () => clearTab
   els.cliSearch.addEventListener("input", () => { clearTimeout(renderClientes._t); renderClientes._t=setTimeout(renderClientes,120); });
   els.cliFilter.addEventListener("change", renderClientes);
   $("#btnNewClient").addEventListener("click", () => openClientForm(null));
+
+  // Créditos UI events
+(tmpEl = $("#btnNewPayment")) && tmpEl.addEventListener("click", ()=> openPaymentModal(null));
+(tmpEl = $("#credSearch")) && tmpEl.addEventListener("input", renderCreditos);
+(tmpEl = $("#credSort")) && tmpEl.addEventListener("change", renderCreditos);
 
   function openClientForm(id){
     const c = id ? store.data.clients.find(x=>x.id===id) : null;
@@ -4157,6 +4436,9 @@ if (typeof window.markDeleted !== "function"){
 
   boot();
 })();
+
+
+
 
 
 
